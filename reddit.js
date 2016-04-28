@@ -126,6 +126,50 @@ module.exports = function RedditAPI(conn) {
           }
         }
       );
+    },
+    
+    getAllPostsForUser: function(userId, options, callback){
+    // In case we are called without an options parameter, shift all the parameters manually
+      if (!callback) {
+        callback = options;
+        options = {};
+      }
+      var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
+      var offset = (options.page || 0) * limit;
+      
+      conn.query(`
+        SELECT *, users.createdAt AS userCreatedat, users.updatedAt AS userUpdatedat, posts.id AS postID FROM posts JOIN users ON posts.userId = users.id WHERE userId = ? 
+        ORDER BY posts.createdAt DESC
+        LIMIT ? OFFSET ?
+        `, [userId,limit, offset],
+        function(err, results) {  //We should abstract this all to a function
+          if (err) {
+            callback(err);
+          }
+          else {
+            var x = results.map(function(post){
+              return {
+                id: post.postID,
+                title: post.title,
+                url: post.url,
+                createdAt: post.createdAt,
+                updatedAt: post.updatedAt,
+                userId: post.userId,
+                user: {
+                  id : post.userId,
+                  user: post.username,
+                  createdAt: post.userCreatedat,
+                  updatedAt: post.userUpdatedat
+                }
+              }
+            });
+            callback(null, x);
+            
+            
+          }
+        }
+      );
     }
+    //,
   }
 }
