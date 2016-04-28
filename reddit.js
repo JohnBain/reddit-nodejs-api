@@ -1,31 +1,6 @@
 var bcrypt = require('bcrypt');
 var HASH_ROUNDS = 10;
 
-var displayRedditObject = function(err, results) { //We should abstract this all to a function
-  if (err) {
-    callback(err);
-  }
-  else {
-    var x = results.map(function(post) {
-      return {
-        id: post.postID,
-        title: post.title,
-        url: post.url,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        userId: post.userId,
-        user: {
-          id: post.userId,
-          user: post.username,
-          createdAt: post.userCreatedat,
-          updatedAt: post.userUpdatedat
-        }
-      }
-    });
-    callback(null, x);
-  }
-}
-
 module.exports = function RedditAPI(conn) {
   return {
     createUser: function(user, callback) {
@@ -110,6 +85,33 @@ module.exports = function RedditAPI(conn) {
         }
       );
     },
+    createSubreddit: function(subreddit, callback) {  //takes an object as first arg, btw. Just like createPost.
+      conn.query(
+        'INSERT INTO `subreddits` (`name`, `description`, `createdAt`) VALUES (?, ?, ?)', [subreddit.name, subreddit.description, null],
+        function(err, result) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            /*
+            Subreddit created successfully. Let's use the result.insertId to retrieve
+            the post and send it to the caller!
+            */
+            conn.query(
+              'SELECT * FROM `subreddits` WHERE `id` = ?', [result.insertId], //WHY DOES THIS WORK?
+              function(err, result) {
+                if (err) {
+                  callback(err);
+                }
+                else {
+                  callback(null, result[0]);
+                }
+              }
+            );
+          }
+        }
+      );
+    },
     getAllPosts: function(options, callback) {
       // In case we are called without an options parameter, shift all the parameters manually
       if (!callback) {
@@ -152,6 +154,31 @@ module.exports = function RedditAPI(conn) {
         }
       );
     },
+    
+    getAllSubreddits: function(options, callback) {
+      // In case we are called without an options parameter, shift all the parameters manually
+      if (!callback) {
+        callback = options;
+        options = {};
+      }
+      var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
+      var offset = (options.page || 0) * limit;
+
+      conn.query(`
+        SELECT * FROM subreddits  
+        ORDER BY createdAt DESC
+        LIMIT ? OFFSET ?
+        `, [limit, offset],
+        function(err, results) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            callback(null, results);
+          }
+        }
+      );
+    },
 
     getAllPostsForUser: function(userId, options, callback) {
       // In case we are called without an options parameter, shift all the parameters manually
@@ -186,7 +213,7 @@ module.exports = function RedditAPI(conn) {
                   createdAt: post.userCreatedat,
                   updatedAt: post.userUpdatedat
                 }
-              }
+              };
             });
             callback(null, x);
           }
