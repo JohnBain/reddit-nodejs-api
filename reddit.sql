@@ -34,3 +34,7 @@ description varchar(200) NULL,
 createdAt TIMESTAMP NOT NULL DEFAULT 0,
 updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
+
+-- Adds the subredditId foreign key to posts
+
+ALTER TABLE posts ADD subredditId int, ADD CONSTRAINT FOREIGN KEY (subredditId) REFERENCES subreddits(id);                                                 
