@@ -122,7 +122,7 @@ module.exports = function RedditAPI(conn) {
       var offset = (options.page || 0) * limit;
 
       conn.query(`
-        SELECT *, users.createdAt AS userCreatedat, users.updatedAt AS userUpdatedat, posts.id AS postID FROM posts JOIN users ON posts.userId = users.id 
+        SELECT *, users.createdAt AS userCreatedat, users.updatedAt AS userUpdatedat, posts.id AS postID, subreddits.id AS subredditsId, subreddits.createdAt AS subredditcreatedAt, subreddits.updatedAt AS subredditupdatedAt FROM posts JOIN users ON posts.userId = users.id JOIN subreddits on posts.subredditId = subreddits.id
         ORDER BY posts.createdAt DESC
         LIMIT ? OFFSET ?
         `, [limit, offset],
@@ -144,8 +144,15 @@ module.exports = function RedditAPI(conn) {
                   user: post.username,
                   createdAt: post.userCreatedat,
                   updatedAt: post.userUpdatedat
+                },
+                subreddit: {
+                  id: post.subredditId,
+                  name: post.name,
+                  description: post.description,
+                  createdAt: post.subredditcreatedAt,
+                  updatedAt: post.subredditupdatedAt
                 }
-              }
+              };
             });
             callback(null, x);
 
