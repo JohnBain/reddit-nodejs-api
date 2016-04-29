@@ -85,8 +85,8 @@ module.exports = function RedditAPI(conn) {
         }
       );
     },
-      createComment: function(comment, callback) {
-      if (comment.hasOwnProperty("parentId")){
+    createComment: function(comment, callback) {
+      if (comment.hasOwnProperty("parentId")) {
         var sqlstring = 'INSERT INTO `comments` (`text`, `userId`, `postId`, `parentId`, `createdAt`) VALUES (?, ?, ?, ?, ?)';
         var variables = [comment.text, comment.userId, comment.postId, comment.parentId, null];
       }
@@ -94,7 +94,7 @@ module.exports = function RedditAPI(conn) {
         var sqlstring = 'INSERT INTO `comments` (`text`, `userId`, `postId`, `createdAt`) VALUES (?, ?, ?, ?)';
         var variables = [comment.text, comment.userId, comment.postId, null];
       };
-        
+
       conn.query(
         sqlstring, variables,
         function(err, result) {
@@ -121,7 +121,7 @@ module.exports = function RedditAPI(conn) {
         }
       );
     },
-    createSubreddit: function(subreddit, callback) {  //takes an object as first arg, btw. Just like createPost.
+    createSubreddit: function(subreddit, callback) { //takes an object as first arg, btw. Just like createPost.
       conn.query(
         'INSERT INTO `subreddits` (`name`, `description`, `createdAt`) VALUES (?, ?, ?)', [subreddit.name, subreddit.description, null],
         function(err, result) {
@@ -197,7 +197,7 @@ module.exports = function RedditAPI(conn) {
         }
       );
     },
-    
+
     getAllSubreddits: function(options, callback) {
       // In case we are called without an options parameter, shift all the parameters manually
       if (!callback) {
@@ -271,7 +271,7 @@ module.exports = function RedditAPI(conn) {
         WHERE posts.id = ?
         LIMIT 1
         `, [id],
-        function(err, results) { 
+        function(err, results) {
           if (err) {
             callback(err);
           }
@@ -299,28 +299,75 @@ module.exports = function RedditAPI(conn) {
     },
     getCommentsforPost: function(postId, callback) {
 
-      conn.query(`
-        SELECT users.username, comments.* from comments JOIN users ON comments.userId = users.id ORDER BY comments.parentId
+        conn.query(`
+        SELECT comments.parentId, comments.id, comments.text, comments.userId, comments.createdAt, comments.updatedAt, p1.parentId AS p1parentId, p1.id AS p11Id, p1.text AS p1text, p1.userId AS p1userId, p1.createdAt AS p1createdAt, p1.updatedAt AS p1createdAt, p2.parentId AS p2parentId, p2.text AS p2text, p2.userId AS p2userId, p2.createdAt AS p2createdAt, p2.updatedAt AS p2updatedAt FROM comments 
+        LEFT JOIN comments AS p1 ON comments.id = p1.parentId 
+        LEFT JOIN comments AS p2 ON p1.id = p2.parentId WHERE comments.parentId IS NULL ORDER BY comments.createdAt, p1.createdAt, p2.createdAt ;
         `, [postId],
-        function(err, results) { 
-          if (err) {
-            callback(err);
-          }
-          else {
-              var x = results.map(function(post) {
-              return {
-                parentId: post.parentId,
-                id: post.id,
-                text: post.text,
-                createdAt: post.createdAt,
-                updatedAt: post.updatedAt,
-                userId: post.userId,
+          function(err, results) {
+            if (err) {
+              callback(err);
+            }
+            else {
+              var bin = [];
+              var index = [];
+              var bot;
+              var mid;
+              results.forEach(function(row) {
+                var top = {
+                  id: row.id,
+                  parentId: row.parentId,
+                  text: row.text,
+                  userId: row.userId,
+                  createdAt: row.createdAt,
+                  updatedAt: row.updatedAt,
+                  replies: []
+                }
+                if (row.p1Id != "null") {
+                  var mid = {
+                    id: row.p11Id,
+                    parentId: row.p1parentId,
+                    text: row.p1text,
+                    userId: row.p1userId,
+                    createdAt: row.p1createdAt,
+                    updatedAt: row.p1updatedAt,
+                    replies: []
+                  }
+                  if (row.p2Id != "null") {
+                     bot = {
+                      id: row.p2Id,
+                      parentId: row.p2parentId,
+                      text: row.p2text,
+                      userId: row.p2userId,
+                      createdAt: row.p2createdAt,
+                      updatedAt: row.p2updatedAt,
+                      replies: []
+                    }
+
+                  }
+                }
+              if (bot){
+                mid['replies'].push(bot)
+                var bot;
               }
-            });
-            callback(null, results);}
-        }
-      );
-    }//,
+              if (mid){
+                top['replies'].push(mid)
+                var mid;
+              };
+              if (!index[top.id]) {
+                index[top.id] = top;
+                bin.push(top);
+              }
+
+
+
+
+              });
+              callback(null, bin);
+            }
+          }
+        );
+      } //,
   }
-  
+
 }

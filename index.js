@@ -83,10 +83,9 @@ redditAPI.getSinglePost(1, function(err,result){
 
 
 /*redditAPI.createComment({
-      text: 'Second comment on parentId 3',
+      text: 'Another top level comment',
       userId: 1,
       postId: 6,
-      parentId: 3
     }, function(err, post) {            //I tried this both with and without parentId. Checks out.
       if (err) {
         console.log(err);
@@ -98,7 +97,7 @@ redditAPI.getSinglePost(1, function(err,result){
     */
     
 redditAPI.getCommentsforPost(6, function(err,result){
-  err ? console.log(err) : console.log(result);
+  err ? console.log(err) : require('util').log(result);
 });
 
 
