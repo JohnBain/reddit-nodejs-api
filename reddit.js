@@ -85,6 +85,42 @@ module.exports = function RedditAPI(conn) {
         }
       );
     },
+      createComment: function(comment, callback) {
+      if (comment.hasOwnProperty("parentId")){
+        var sqlstring = 'INSERT INTO `comments` (`text`, `userId`, `postId`, `parentId`, `createdAt`) VALUES (?, ?, ?, ?, ?)';
+        var variables = [comment.text, comment.userId, comment.postId, comment.parentId, null];
+      }
+      else {
+        var sqlstring = 'INSERT INTO `comments` (`text`, `userId`, `postId`, `createdAt`) VALUES (?, ?, ?, ?)';
+        var variables = [comment.text, comment.userId, comment.postId, null];
+      };
+        
+      conn.query(
+        sqlstring, variables,
+        function(err, result) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            /*
+            Post inserted successfully. Let's use the result.insertId to retrieve
+            the post and send it to the caller!
+            */
+            conn.query(
+              'SELECT * FROM `comments` WHERE `id` = ?', [result.insertId],
+              function(err, result) {
+                if (err) {
+                  callback(err);
+                }
+                else {
+                  callback(null, result[0]);
+                }
+              }
+            );
+          }
+        }
+      );
+    },
     createSubreddit: function(subreddit, callback) {  //takes an object as first arg, btw. Just like createPost.
       conn.query(
         'INSERT INTO `subreddits` (`name`, `description`, `createdAt`) VALUES (?, ?, ?)', [subreddit.name, subreddit.description, null],
@@ -260,6 +296,7 @@ module.exports = function RedditAPI(conn) {
           }
         }
       );
-    },
-  } //,
+    }//,
+  }
+  
 }
