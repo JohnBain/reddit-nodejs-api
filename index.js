@@ -4,7 +4,7 @@ var mysql = require('mysql');
 // create a connection to our Cloud9 server
 var connection = mysql.createConnection({
   host     : 'localhost',
-  user     : 'ziad_saab', // CHANGE THIS :)
+  user     : 'jbain1', // CHANGE THIS :)
   password : '',
   database: 'reddit'
 });
@@ -14,17 +14,18 @@ var reddit = require('./reddit');
 var redditAPI = reddit(connection);
 
 // It's request time!
+/*
 redditAPI.createUser({
-  username: 'hello23',
-  password: 'xxx'
+  username: 'anotheruser',
+  password: 'yes'
 }, function(err, user) {
   if (err) {
     console.log(err);
   }
   else {
     redditAPI.createPost({
-      title: 'hi reddit!',
-      url: 'https://www.reddit.com',
+      title: 'another post!',
+      url: 'https://www.decodemtl.com',
       userId: user.id
     }, function(err, post) {
       if (err) {
@@ -36,3 +37,70 @@ redditAPI.createUser({
     });
   }
 });
+*/
+
+/*redditAPI.createPost({
+      title: 'Cat bonanza!',
+      url: 'https://www.placekitten.com',
+      userId: 7,
+      subredditId: 3
+    }, function(err, post) {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log(post);
+      }
+    });
+*/
+
+
+/*redditAPI.getAllPosts(function(err, result){
+  err ? console.log(err) : console.log(result)
+});*/
+
+/*
+redditAPI.getSinglePost(1, function(err,result){
+  err ? console.log(err) : console.log(result);
+});
+*/
+
+/*redditAPI.createSubreddit({
+      name: 'Cats',
+      description: 'Cats!',
+    }, function(err, post) {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log(post);
+      }
+    });*/
+    
+/*redditAPI.getAllSubreddits(function(err, result){
+  err ? console.log(err) : console.log(result)
+});*/
+
+
+/*redditAPI.createComment({
+      text: 'Second comment on parentId 3',
+      userId: 1,
+      postId: 6,
+      parentId: 3
+    }, function(err, post) {            //I tried this both with and without parentId. Checks out.
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log(post);
+      }
+    });
+    */
+    
+redditAPI.getCommentsforPost(6, function(err,result){
+  err ? console.log(err) : console.log(result);
+});
+
+
+
+

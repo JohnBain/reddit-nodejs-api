@@ -267,11 +267,11 @@ module.exports = function RedditAPI(conn) {
     getSinglePost: function(id, callback) {
 
       conn.query(`
-        SELECT *, users.createdAt AS userCreatedat, users.updatedAt AS userUpdatedat, posts.id AS postID FROM posts JOIN users ON posts.userId = users.id 
+        SELECT *, users.createdAt AS userCreatedat, users.updatedAt AS userUpdatedat, posts.id AS postID FROM posts JOIN users ON posts.userId = users.id
         WHERE posts.id = ?
         LIMIT 1
         `, [id],
-        function(err, results) { //We should abstract this all to a function
+        function(err, results) { 
           if (err) {
             callback(err);
           }
@@ -294,6 +294,30 @@ module.exports = function RedditAPI(conn) {
             });
             callback(null, x[0]);
           }
+        }
+      );
+    },
+    getCommentsforPost: function(postId, callback) {
+
+      conn.query(`
+        SELECT users.username, comments.* from comments JOIN users ON comments.userId = users.id ORDER BY comments.parentId
+        `, [postId],
+        function(err, results) { 
+          if (err) {
+            callback(err);
+          }
+          else {
+              var x = results.map(function(post) {
+              return {
+                parentId: post.parentId,
+                id: post.id,
+                text: post.text,
+                createdAt: post.createdAt,
+                updatedAt: post.updatedAt,
+                userId: post.userId,
+              }
+            });
+            callback(null, results);}
         }
       );
     }//,
