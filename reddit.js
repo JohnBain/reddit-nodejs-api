@@ -300,7 +300,7 @@ module.exports = function RedditAPI(conn) {
     getCommentsforPost: function(postId, callback) {
 
         conn.query(`
-        SELECT comments.parentId, comments.id, comments.text, comments.userId, comments.createdAt, comments.updatedAt, p1.parentId AS p1parentId, p1.id AS p11Id, p1.text AS p1text, p1.userId AS p1userId, p1.createdAt AS p1createdAt, p1.updatedAt AS p1createdAt, p2.parentId AS p2parentId, p2.text AS p2text, p2.userId AS p2userId, p2.createdAt AS p2createdAt, p2.updatedAt AS p2updatedAt FROM comments 
+        SELECT comments.parentId, comments.id, comments.text, comments.userId, comments.createdAt, comments.updatedAt, p1.parentId AS p1parentId, p1.id AS p11Id, p1.text AS p1text, p1.userId AS p1userId, p1.createdAt AS p1createdAt, p1.updatedAt AS p1updatedAt, p2.parentId AS p2parentId, p2.text AS p2text, p2.Id AS p2Id, p2.userId AS p2userId, p2.createdAt AS p2createdAt, p2.updatedAt AS p2updatedAt FROM comments 
         LEFT JOIN comments AS p1 ON comments.id = p1.parentId 
         LEFT JOIN comments AS p2 ON p1.id = p2.parentId WHERE comments.parentId IS NULL ORDER BY comments.createdAt, p1.createdAt, p2.createdAt ;
         `, [postId],
@@ -334,6 +334,7 @@ module.exports = function RedditAPI(conn) {
                     replies: []
                   }
                   if (row.p2Id != "null") {
+                   
                      bot = {
                       id: row.p2Id,
                       parentId: row.p2parentId,
@@ -343,7 +344,7 @@ module.exports = function RedditAPI(conn) {
                       updatedAt: row.p2updatedAt,
                       replies: []
                     }
-
+                 console.log(row)
                   }
                 }
               if (bot){
