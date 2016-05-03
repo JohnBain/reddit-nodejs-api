@@ -172,6 +172,7 @@ module.exports = function RedditAPI(conn) {
                 id: post.postID,
                 title: post.title,
                 url: post.url,
+                selftext: post.selftext,
                 createdAt: post.createdAt,
                 updatedAt: post.updatedAt,
                 userId: post.userId,
@@ -311,8 +312,7 @@ module.exports = function RedditAPI(conn) {
             else {
               var bin = [];
               var index = [];
-              var bot;
-              var mid;
+             
               results.forEach(function(row) {
                 var top = {
                   id: row.id,
@@ -335,7 +335,7 @@ module.exports = function RedditAPI(conn) {
                   }
                   if (row.p2Id != "null") {
                    
-                     bot = {
+                     var bot = {
                       id: row.p2Id,
                       parentId: row.p2parentId,
                       text: row.p2text,
