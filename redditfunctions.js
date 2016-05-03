@@ -126,64 +126,85 @@ var createPost = function(post, callback) {
 
 var createUser = function(user, callback) {
 
-    bcrypt.hash(user.password, HASH_ROUNDS, function(err, hashedPassword) {
-      if (err) {
-        callback(err);
-      }
-      else {
-        conn.query(
-          'INSERT INTO `users` (`username`,`password`, `createdAt`) VALUES (?, ?, ?)', [user.username, hashedPassword, null],
-          function(err, result) {
-            if (err) {
-              if (err.code === 'ER_DUP_ENTRY') {
-                callback(new Error('A user with this username already exists'));
-              }
-              else {
-                callback(err);
-              }
+  bcrypt.hash(user.password, HASH_ROUNDS, function(err, hashedPassword) {
+    if (err) {
+      callback(err);
+    }
+    else {
+      conn.query(
+        'INSERT INTO `users` (`username`,`password`, `createdAt`) VALUES (?, ?, ?)', [user.username, hashedPassword, null],
+        function(err, result) {
+          if (err) {
+            if (err.code === 'ER_DUP_ENTRY') {
+              callback(new Error('A user with this username already exists'));
             }
             else {
-              conn.query(
-                'SELECT `id`, `username`, `createdAt`, `updatedAt` FROM `users` WHERE `id` = ?', [result.insertId],
-                function(err, result) {
-                  if (err) {
-                    callback(err);
-                  }
-                  else {
-                    /*
-                    Finally! Here's what we did so far:
-                    1. Hash the user's password
-                    2. Insert the user in the DB
-                    3a. If the insert fails, report the error to the caller
-                    3b. If the insert succeeds, re-fetch the user from the DB
-                    4. If the re-fetch succeeds, return the object to the caller
-                    */
-                    callback(null, result);
-                  }
-                }
-              );
+              callback(err);
             }
           }
-        );
-      }
-    });
-  };
-  
-  
-  // createPost({
-  //   title: 'YET ANOTHER CAT POST!!!!!!!',
-  //   url: 'https://www.placekitten.com',
-  //   userId: 1,
-  //   subredditId: 3
-  // }, function(err, post) {
-  //   if (err) {
-  //     console.log(err);
-  //   }
-  //   else {
-  //     console.log(post);
-  //   }
-  // });
+          else {
+            conn.query(
+              'SELECT `id`, `username`, `createdAt`, `updatedAt` FROM `users` WHERE `id` = ?', [result.insertId],
+              function(err, result) {
+                if (err) {
+                  callback(err);
+                }
+                else {
+                  /*
+                  Finally! Here's what we did so far:
+                  1. Hash the user's password
+                  2. Insert the user in the DB
+                  3a. If the insert fails, report the error to the caller
+                  3b. If the insert succeeds, re-fetch the user from the DB
+                  4. If the re-fetch succeeds, return the object to the caller
+                  */
+                  callback(null, result);
+                }
+              }
+            );
+          }
+        }
+      );
+    }
+  });
+};
 
-  module.exports = {
-    getAllPosts, createPost, getHomepage, createUser
-  };
+
+// createPost({
+//   title: 'YET ANOTHER CAT POST!!!!!!!',
+//   url: 'https://www.placekitten.com',
+//   userId: 1,
+//   subredditId: 3
+// }, function(err, post) {
+//   if (err) {
+//     console.log(err);
+//   }
+//   else {
+//     console.log(post);
+//   }
+// });
+
+var checkLogin = function(user, pass, callback) {
+  conn.query('SELECT * FROM users WHERE username = ?', [user], function(err, result) {
+    // check for errors, then...
+    if (result.length === 0) {
+      callback(new Error('username or password incorrect')); // in this case the user does not exists
+    }
+    else {
+      var user = result[0];
+      var actualHashedPassword = user.password;
+      bcrypt.compare(pass, actualHashedPassword, function(err, result) {
+        if (result === true) { // let's be extra safe here
+          callback(user);
+        }
+        else {
+          callback(new Error('username or password incorrect')); // in this case the password is wrong, but we reply with the same error
+        }
+      });
+    }
+  });
+}
+
+module.exports = {
+  getAllPosts, createPost, getHomepage, createUser, checkLogin
+};

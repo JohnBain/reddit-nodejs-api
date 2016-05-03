@@ -58,12 +58,16 @@ app.post('/signup', function(req, res) {
 
 
 app.get('/login', function(req, res){
+    res.sendFile('/home/ubuntu/workspace/login.html');
+});
+
+app.post('/login', function(req, res){
   
-})
+});
 
 app.get('/createpost', function(req, res){
   
-})
+});
 
 // app.get('/createContent', function(req, res) {
 //   console.log(req)
