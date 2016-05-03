@@ -1,105 +1,100 @@
-// load the mysql library
-var mysql = require('mysql');
+// function sortByKey(array, key) {
+//     return array.sort(function(a, b) {
+//         var x = a[key]; var y = b[key];
+//         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+//     });
+// }
 
-// create a connection to our Cloud9 server
-var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'jbain1', // CHANGE THIS :)
-  password : '',
-  database: 'reddit'
+
+var express = require('express');
+var app = express();
+var bodyParser = require('body-parser')
+var redditAPI = require('./redditfunctions.js')
+
+app.get('/', function(req, res) {
+  redditAPI.getHomepage(function(result) {
+    var finalstring = `<div id="contents">
+    <h1>Fake Reddit Homepage</h1>
+    <ul class="contents-list">`
+    //result = sortByKey(result, 'id'); //Sorting in ascending order by key
+    console.log(result)
+    result.forEach(function(post) {
+      finalstring += `<li class="content-item">
+      <h2 class='${post.title}'>
+        <p>${post.score} <a href='${post.url}'/>${post.title}</a>
+      </h2>
+      <p>Created by ${post.user}</p>`
+    })
+   
+    finalstring += "</li> </ul> </div>"
+    res.send(finalstring)
+  })
 });
 
-// load our API and pass it the connection
-var reddit = require('./reddit');
-var redditAPI = reddit(connection);
+app.use(bodyParser());
 
-// It's request time!
-/*
-redditAPI.createUser({
-  username: 'anotheruser',
-  password: 'yes'
-}, function(err, user) {
-  if (err) {
-    console.log(err);
-  }
-  else {
-    redditAPI.createPost({
-      title: 'another post!',
-      url: 'https://www.decodemtl.com',
-      userId: user.id
-    }, function(err, post) {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log(post);
-      }
-    });
-  }
-});
-*/
+app.get('/signup', function(req, res) {
+  res.sendFile('/home/ubuntu/workspace/signup.html')
+})
 
-/*redditAPI.createPost({
-      title: 'Cat bonanza!',
-      url: 'https://www.placekitten.com',
-      userId: 7,
-      subredditId: 3
-    }, function(err, post) {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log(post);
-      }
-    });
-*/
-
-
-/*redditAPI.getAllPosts(function(err, result){
-  err ? console.log(err) : console.log(result)
-});*/
-
-/*
-redditAPI.getSinglePost(1, function(err,result){
-  err ? console.log(err) : console.log(result);
-});
-*/
-
-/*redditAPI.createSubreddit({
-      name: 'Cats',
-      description: 'Cats!',
-    }, function(err, post) {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log(post);
-      }
-    });*/
-    
-/*redditAPI.getAllSubreddits(function(err, result){
-  err ? console.log(err) : console.log(result)
-});*/
-
-
-/*redditAPI.createComment({
-      text: 'Another top level comment',
-      userId: 1,
-      postId: 6,
-    }, function(err, post) {            //I tried this both with and without parentId. Checks out.
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log(post);
-      }
-    });
-    */
-    
-redditAPI.getCommentsforPost(6, function(err,result){
-  err ? console.log(err) : require('util').log(result);
+app.post('/signup', function(req, res) {
+  console.log(req.body.username);
+  console.log(req.body.password);
+  var signupUsername = req.body.username;
+  var signupPassword = req.body.password;
+  redditAPI.createUser({
+    username: signupUsername,
+    password: signupPassword,
+  }, function(err, user) {
+    if (err) {
+      console.log(err)
+      res.send("Error. User not created.");
+    }
+    else {
+      res.redirect('/')
+    }
+  });
 });
 
 
+app.get('/login', function(req, res){
+  
+})
+
+app.get('/createpost', function(req, res){
+  
+})
+
+// app.get('/createContent', function(req, res) {
+//   console.log(req)
+//   res.sendFile('/home/ubuntu/workspace/form.html')
+// })
+
+// app.post('/createContent', function(req, res) {
+//   var postUrl = req.body.url;
+//   var postTitle = req.body.title;
+//   redditAPI.createPost({
+//     title: postTitle,
+//     url: postUrl,
+//     userId: 1,
+//     subredditId: 3
+//   }, function(err, post) {
+//     if (err) {
+//       res.send("Error. Post not created.");
+//     }
+//     else {
+//       res.redirect('/posts')
+//     }
+//   });
+// });
 
 
+/* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
+
+// Boilerplate code to start up the web server
+var server = app.listen(process.env.PORT, process.env.IP, function() {
+  var host = server.address().address;
+  var port = server.address().port;
+
+  console.log('Example app listening at http://%s:%s', host, port);
+});
