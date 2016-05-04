@@ -11,11 +11,21 @@ var conn = mysql.createConnection({
   database: 'reddit'
 });
 
-var getHomepage = function(callback) {
+var getHomepage = function(sort, callback) {
+  var askSQL = "";
+  sort === "top" ? askSQL = "score DESC" : null;
+  sort === "hot" ? askSQL = "hotScore DESC, posts.createdAt DESC" : null;
+  sort === "new" ? askSQL = "posts.createdAt DESC" : null;
+  sort === "controversial" ? askSQL = "contScore DESC, posts.createdAt DESC" : askSQL = "posts.createdAt DESC";
+  //^the last else condition here makes it so if no query or a different query is passed we just sort by new
   conn.query(`
-        SELECT *, posts.id AS postID, users.username FROM posts JOIN users ON posts.userId = users.id
+        SELECT *, (posts.upvotes - posts.downvotes) AS score, posts.id AS postID, users.username, 
+        (posts.upvotes - posts.downvotes)/TIMEDIFF(NOW(), posts.createdAt) AS hotScore,
+        LEAST(posts.upvotes, posts.downvotes)/POWER((posts.upvotes - posts.downvotes), 2) AS contScore
+        FROM posts 
+        JOIN users ON posts.userId = users.id
         WHERE subredditId = 3
-        ORDER BY posts.createdAt DESC
+        ORDER BY ${askSQL}
         `,
     function(err, results) { //We should abstract this all to a function
       if (err) {

@@ -1,9 +1,4 @@
-// function sortByKey(array, key) {
-//     return array.sort(function(a, b) {
-//         var x = a[key]; var y = b[key];
-//         return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-//     });
-// }
+
 
 
 var express = require('express');
@@ -11,19 +6,27 @@ var app = express();
 var bodyParser = require('body-parser')
 var redditAPI = require('./redditfunctions.js')
 
+app.get('/greet', function(request, response) {
+  console.log(request.headers)
+  var name = request.query.name;
+  var result = "Hello " + name;
+  response.send(result);
+})
+
+//greet?name=john
+
 app.get('/', function(req, res) {
-  redditAPI.getHomepage(function(result) {
+  redditAPI.getHomepage(req.query.sort, function(result) {  //This is where we pass the sorting query
     var finalstring = `<div id="contents">
     <h1>Fake Reddit Homepage</h1>
     <ul class="contents-list">`
-    //result = sortByKey(result, 'id'); //Sorting in ascending order by key
     console.log(result)
     result.forEach(function(post) {
       finalstring += `<li class="content-item">
       <h2 class='${post.title}'>
         <p>${post.score} <a href='${post.url}'/>${post.title}</a>
       </h2>
-      <p>Created by ${post.user}</p>`
+      <p>Created by ${post.user} at ${post.createdAt}</p>`
     })
    
     finalstring += "</li> </ul> </div>"
@@ -38,8 +41,6 @@ app.get('/signup', function(req, res) {
 })
 
 app.post('/signup', function(req, res) {
-  console.log(req.body.username);
-  console.log(req.body.password);
   var signupUsername = req.body.username;
   var signupPassword = req.body.password;
   redditAPI.createUser({
@@ -62,7 +63,12 @@ app.get('/login', function(req, res){
 });
 
 app.post('/login', function(req, res){
+  console.log(req.body.password)
   
+});
+
+app.get('/loginsuccessful', function(req, res){
+  res.send("<h1>Yay</h2>")
 });
 
 app.get('/createpost', function(req, res){
