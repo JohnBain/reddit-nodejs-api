@@ -1,6 +1,3 @@
-
-
-
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser')
@@ -41,11 +38,9 @@ app.get('/signup', function(req, res) {
 })
 
 app.post('/signup', function(req, res) {
-  var signupUsername = req.body.username;
-  var signupPassword = req.body.password;
   redditAPI.createUser({
-    username: signupUsername,
-    password: signupPassword,
+    username: req.body.username,
+    password: req.body.password,
   }, function(err, user) {
     if (err) {
       console.log(err)
@@ -63,41 +58,31 @@ app.get('/login', function(req, res){
 });
 
 app.post('/login', function(req, res){
-  console.log(req.body.password)
-  
+  redditAPI.checkLogin(req.body.username, req.body.password, 
+  function(err, user){
+    if (err) {res.status(401).send(err.message);}
+    else {
+      redditAPI.createSession(user.id, function(err, token){
+        if (err) {
+          res.status(500).send('Authentication failed. Please try again later.')
+        }
+        else {
+          res.cookie('SESSION', token);
+          res.redirect('/login')
+        }
+      })
+    }
+  })
 });
 
 app.get('/loginsuccessful', function(req, res){
+  console.log(req)
   res.send("<h1>Yay</h2>")
 });
 
 app.get('/createpost', function(req, res){
   
 });
-
-// app.get('/createContent', function(req, res) {
-//   console.log(req)
-//   res.sendFile('/home/ubuntu/workspace/form.html')
-// })
-
-// app.post('/createContent', function(req, res) {
-//   var postUrl = req.body.url;
-//   var postTitle = req.body.title;
-//   redditAPI.createPost({
-//     title: postTitle,
-//     url: postUrl,
-//     userId: 1,
-//     subredditId: 3
-//   }, function(err, post) {
-//     if (err) {
-//       res.send("Error. Post not created.");
-//     }
-//     else {
-//       res.redirect('/posts')
-//     }
-//   });
-// });
-
 
 /* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
 

@@ -1,5 +1,6 @@
 var mysql = require('mysql');
 var bcrypt = require('bcrypt');
+var secureRandom = require('secure-random');
 var HASH_ROUNDS = 10;
 
 
@@ -27,7 +28,7 @@ var getHomepage = function(sort, callback) {
         WHERE subredditId = 3
         ORDER BY ${askSQL}
         `,
-    function(err, results) { //We should abstract this all to a function
+    function(err, results) { 
       if (err) {
         callback(err);
       }
@@ -205,7 +206,7 @@ var checkLogin = function(user, pass, callback) {
       var actualHashedPassword = user.password;
       bcrypt.compare(pass, actualHashedPassword, function(err, result) {
         if (result === true) { // let's be extra safe here
-          callback(user);
+          callback(null, user);
         }
         else {
           callback(new Error('username or password incorrect')); // in this case the password is wrong, but we reply with the same error
@@ -213,8 +214,25 @@ var checkLogin = function(user, pass, callback) {
       });
     }
   });
+};
+
+function createSessionToken() {
+  return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
 }
 
+function createSession(userId, callback) {
+  var token = createSessionToken();
+  conn.query('INSERT INTO sessions SET userId = ?, token = ?', [userId, token], function(err, result) {
+    if (err) {
+      callback(err);
+    }
+    else {
+      callback(null, token); 
+    }
+  });
+}
+
+
 module.exports = {
-  getAllPosts, createPost, getHomepage, createUser, checkLogin
+  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession
 };
