@@ -1,0 +1,15 @@
+<form action="/createpost" method="POST">
+  <div>
+    <p>Create a post as <b>${request.loggedInUser.username}</b>:</p>
+  </div>
+  <div>
+    <input type="text" name="title" placeholder="Enter a title">
+  </div>
+  <div>
+    <input type="text" name="url" placeholder="Enter a url">
+  </div>
+  <div>
+    <TEXTAREA name="selftext"></textarea>
+  </div>
+  <button type="submit">Create post!</button>
+</form>

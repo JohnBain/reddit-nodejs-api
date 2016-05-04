@@ -216,11 +216,11 @@ var checkLogin = function(user, pass, callback) {
   });
 };
 
-function createSessionToken() {
+var createSessionToken = function() {
   return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
 }
 
-function createSession(userId, callback) {
+var createSession = function (userId, callback) {
   var token = createSessionToken();
   conn.query('INSERT INTO sessions SET userId = ?, token = ?', [userId, token], function(err, result) {
     if (err) {
@@ -232,7 +232,13 @@ function createSession(userId, callback) {
   });
 }
 
+var getUserFromSession = function (sessionToken, callback){
+  conn.query(`select distinct users.* from sessions JOIN users ON users.id = sessions.userId where token = ?`, [sessionToken], function(err,result){
+    callback(null, result[0])
+  })
+}
+
 
 module.exports = {
-  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession
+  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession
 };
