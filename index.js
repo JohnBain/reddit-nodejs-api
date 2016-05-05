@@ -103,15 +103,15 @@ app.get('/controlpanel', function(request, response) {
   }
 });
 
-// app.post('/controlpanel'), function(request, response) {
-//   redditAPI.deletePost(request.body.title, function)
-// }
+//app.post('/controlpanel'), function(request, response) {
+//  redditAPI.deletePost(request.body.title, function)
+//}
 
 app.get('/createpost', function(request, response) {
   if (!request.loggedInUser) {
     response.status(401).send('You must be logged in to create content!');
   }
-  response.send(createPost(request.loggedInUser.username));
+  response.send(createPost(request.loggedInUser.username))
 })
 
 app.post('/createpost', function(request, response) {
