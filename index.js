@@ -34,7 +34,6 @@ app.get('/', function(req, res) {
     <h1>Fake Reddit Homepage</h1>
     <ul class="contents-list">`
     result.forEach(function(post) {
-      console.log(post);
       finalstring += `<li class="content-item">
       <h2 class='${post.title}'>
         <p>${post.score} <a href='${post.url}'/>${post.title}</a>

@@ -19,14 +19,18 @@ var conn = mysql.createConnection({
 
 var getHomepage = function(sort, callback) {
   var askSQL = "";
-  sort === "top" ? askSQL = "score DESC" : null;
-  sort === "hot" ? askSQL = "hotScore DESC, posts.createdAt DESC" : null;
-  sort === "new" ? askSQL = "posts.createdAt DESC" : null;
-  sort === "controversial" ? askSQL = "contScore DESC, posts.createdAt DESC" : askSQL = "posts.createdAt DESC";
+  
+  if (sort === "top"){ askSQL = "score DESC"}
+  else if (sort === "hot"){askSQL = "hotScore DESC, postCreatedAt DESC"}
+  else if (sort === "new"){askSQL = "postCreatedAt DESC"}
+  else if (sort === "controversial"){askSQL = "contScore DESC, postCreatedAt DESC"}
+  else {askSQL = "postCreatedAt DESC"}
+  console.log(askSQL)
   //^the last else condition here makes it so if no query or a different query is passed we just sort by new
   conn.query(`
         SELECT *, posts.selftext, COALESCE(sum(votes.vote), 0) AS score, posts.id AS postID, users.username,
-        score/TIMEDIFF(NOW(), posts.createdAt) AS hotScore
+        score/TIMEDIFF(NOW(), posts.createdAt) AS hotScore,
+        posts.createdAt as postCreatedAt
         FROM posts 
         LEFT JOIN votes ON posts.id = votes.postId
         JOIN users ON posts.userId = users.id
@@ -47,7 +51,7 @@ var getHomepage = function(sort, callback) {
             title: post.title,
             url: post.url,
             selftext: post.selftext,
-            createdAt: post.createdAt,
+            createdAt: post.postCreatedAt,
             updatedAt: post.updatedAt,
             userId: post.userId,
             user: post.username,
