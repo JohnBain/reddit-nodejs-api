@@ -4,6 +4,11 @@ var secureRandom = require('secure-random');
 var HASH_ROUNDS = 10;
 
 
+
+
+
+
+
 // create a connection to our Cloud9 server
 var conn = mysql.createConnection({
   host: 'localhost',
@@ -20,11 +25,12 @@ var getHomepage = function(sort, callback) {
   sort === "controversial" ? askSQL = "contScore DESC, posts.createdAt DESC" : askSQL = "posts.createdAt DESC";
   //^the last else condition here makes it so if no query or a different query is passed we just sort by new
   conn.query(`
-        SELECT *, (posts.upvotes - posts.downvotes) AS score, posts.id AS postID, users.username, 
+        SELECT *, posts.selftext, (posts.upvotes - posts.downvotes) AS score, posts.id AS postID, users.username, 
         (posts.upvotes - posts.downvotes)/TIMEDIFF(NOW(), posts.createdAt) AS hotScore,
         LEAST(posts.upvotes, posts.downvotes)/POWER((posts.upvotes - posts.downvotes), 2) AS contScore
         FROM posts 
         JOIN users ON posts.userId = users.id
+        JOIN subreddits ON posts.subredditId = subreddits.id
         WHERE subredditId = 3
         ORDER BY ${askSQL}
         `,
@@ -39,6 +45,7 @@ var getHomepage = function(sort, callback) {
             score: post.score,
             title: post.title,
             url: post.url,
+            selftext: post.selftext,
             createdAt: post.createdAt,
             updatedAt: post.updatedAt,
             userId: post.userId,
@@ -53,7 +60,7 @@ var getHomepage = function(sort, callback) {
 
 var createPost = function(post, callback) {
   conn.query(
-    'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `createdAt`) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, null],
+    'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.selftext, post.subredditId, null],
     function(err, result) {
       if (err) {
         callback(err);
@@ -64,7 +71,7 @@ var createPost = function(post, callback) {
         the post and send it to the caller!
         */
         conn.query(
-          'SELECT `id`,`title`,`url`,`userId`, `createdAt`, `subredditId`, `updatedAt` FROM `posts` WHERE `id` = ?', [result.insertId],
+          'SELECT `id`,`title`,`url`,`userId`, `selftext`, `createdAt`, `subredditId`, `updatedAt` FROM `posts` WHERE `id` = ?', [result.insertId],
           function(err, result) {
             if (err) {
               callback(err);
@@ -109,7 +116,7 @@ var getAllPosts = function(callback) {
 
 var createPost = function(post, callback) {
   conn.query(
-    'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `createdAt`) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, null],
+    'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, post.selftext, null],
     function(err, result) {
       if (err) {
         callback(err);
@@ -120,7 +127,7 @@ var createPost = function(post, callback) {
         the post and send it to the caller!
         */
         conn.query(
-          'SELECT `id`,`title`,`url`,`userId`, `createdAt`, `subredditId`, `updatedAt` FROM `posts` WHERE `id` = ?', [result.insertId],
+          'SELECT `id`,`title`,`url`,`userId`, `createdAt`, `subredditId`, `selftext`, `updatedAt` FROM `posts` WHERE `id` = ?', [result.insertId],
           function(err, result) {
             if (err) {
               callback(err);
@@ -133,6 +140,17 @@ var createPost = function(post, callback) {
       }
     }
   );
+};
+
+var deletePost = function(postname, callback){
+  conn.query(`DELETE FROM posts WHERE title = '${postname}' LIMIT 1`), function(err, result){
+    if (err){
+      callback(err)
+    }
+    else{
+      callback(result);
+    }
+  }
 }
 
 var createUser = function(user, callback) {
@@ -240,5 +258,5 @@ var getUserFromSession = function (sessionToken, callback){
 
 
 module.exports = {
-  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession
+  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost
 };
