@@ -148,14 +148,9 @@ var createPost = function(post, callback) {
 };
 
 var deletePost = function(postname, callback){
-  conn.query(`DELETE FROM posts WHERE title = '${postname}' LIMIT 1`), function(err, result){
-    if (err){
-      callback(err)
-    }
-    else{
-      callback(result);
-    }
-  }
+  conn.query(`DELETE FROM posts WHERE title = '${postname}' LIMIT 1`, function(err, result){
+    callback(result)
+  })
 }
 
 var createUser = function(user, callback) {

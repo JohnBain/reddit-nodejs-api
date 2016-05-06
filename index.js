@@ -102,9 +102,12 @@ app.get('/controlpanel', function(request, response) {
   }
 });
 
-//app.post('/controlpanel'), function(request, response) {
-//  redditAPI.deletePost(request.body.title, function)
-//}
+app.post('/controlpanel', function(request, response) {
+ redditAPI.deletePost(request.body.title, function(post){
+   console.log(post, "POSTasdasdasd")
+   response.redirect('/')
+ })
+});
 
 app.get('/createpost', function(request, response) {
   if (!request.loggedInUser) {
