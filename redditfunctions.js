@@ -3,12 +3,6 @@ var bcrypt = require('bcrypt');
 var secureRandom = require('secure-random');
 var HASH_ROUNDS = 10;
 
-
-
-
-
-
-
 // create a connection to our Cloud9 server
 var conn = mysql.createConnection({
   host: 'localhost',
@@ -252,11 +246,26 @@ var createSession = function (userId, callback) {
 
 var getUserFromSession = function (sessionToken, callback){
   conn.query(`select distinct users.* from sessions JOIN users ON users.id = sessions.userId where token = ?`, [sessionToken], function(err,result){
+    if (err){
+      callback(err)
+    }
+    else{
     callback(null, result[0])
+    }
   })
 }
 
+var votePost = function(vote, postId, userId, callback){
+  conn.query('INSERT INTO votes SET vote = ?, postId = ?, userId = ?', [vote, postId, userId], function(err, result) {
+    if (err) {
+      callback(err);
+    }
+    else {
+      callback(null, result); 
+    }
+  });
+}
 
 module.exports = {
-  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost
+  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost, votePost
 };

@@ -7,6 +7,18 @@ var createPost = require('./createpost.js')
 
 app.use(cookieParser()); // this middleware will add a `cookies` property to the request, an object of key:value pairs for all the cookies we set
 app.use(bodyParser());
+app.use(express.static('public'))
+
+function createHead(content) {
+  return `
+    <head>
+      <link rel="stylesheet" type="text/css" href="../css/main.css">
+    </head>
+    <body>
+      ${content}
+    </body>
+  `
+}
 
 function checkLoginToken(request, response, next) {
   // check if there's a SESSION cookie...
@@ -35,18 +47,42 @@ app.get('/', function(req, res) {
     <ul class="contents-list">`
     result.forEach(function(post) {
       finalstring += `<li class="content-item">
+  
+  <div class="godzilla">
+  <div id="votes">
+  <form action="/vote" method="post">
+  <input type="hidden" name="vote" value="1">
+  <input type="hidden" name="postId" value="${post.id}">
+  <button type="submit"><img src="../images/uparrow.png"></button>
+  </form>
+  <form action="/vote" method="post">
+  <input type="hidden" name="vote" value="-1">
+  <input type="hidden" name="postId" value="${post.id}">
+  <button type="submit"><img src="../images/downarrow.png"></button>
+  </form>
+  </div>
+      
+  <div id="post">
       <h2 class='${post.title}'>
         <p>${post.score} <a href='${post.url}'/>${post.title}</a>
       </h2>
-      <p>Created by ${post.user} at ${post.createdAt}</p>`
+      <p>Created by ${post.user} at ${post.createdAt}</p>
+    </div>
+    </div>`
     })
 
     finalstring += "</li> </ul> </div>"
-    res.send(finalstring)
+    res.send(createHead(finalstring))
 
   })
 });
 
+app.post('/vote', function(req, res) {
+  console.log(req.loggedInUser);
+  redditAPI.votePost(req.body.vote, req.body.postId, req.loggedInUser.id, function(post) {
+    res.redirect('/')
+  })
+});
 
 
 app.get('/signup', function(req, res) {
@@ -59,7 +95,6 @@ app.post('/signup', function(req, res) {
     password: req.body.password,
   }, function(err, user) {
     if (err) {
-      console.log(err)
       res.send("Error. User not created.");
     }
     else {
@@ -103,10 +138,9 @@ app.get('/controlpanel', function(request, response) {
 });
 
 app.post('/controlpanel', function(request, response) {
- redditAPI.deletePost(request.body.title, function(post){
-   console.log(post, "POSTasdasdasd")
-   response.redirect('/')
- })
+  redditAPI.deletePost(request.body.title, function(post) {
+    response.redirect('/')
+  })
 });
 
 app.get('/createpost', function(request, response) {
