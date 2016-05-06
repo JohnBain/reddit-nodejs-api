@@ -13,18 +13,31 @@ var conn = mysql.createConnection({
 
 var getHomepage = function(sort, callback) {
   var askSQL = "";
-  
-  if (sort === "top"){ askSQL = "score DESC"}
-  else if (sort === "hot"){askSQL = "hotScore DESC, postCreatedAt DESC"}
-  else if (sort === "new"){askSQL = "postCreatedAt DESC"}
-  else if (sort === "controversial"){askSQL = "contScore DESC, postCreatedAt DESC"}
-  else {askSQL = "postCreatedAt DESC"}
-  console.log(askSQL)
-  //^the last else condition here makes it so if no query or a different query is passed we just sort by new
+
+  if (sort === "top") {
+    askSQL = "score DESC"
+  }
+  else if (sort === "hot") {
+    askSQL = "hotScore DESC, postCreatedAt DESC"
+  }
+  else if (sort === "new") {
+    askSQL = "postCreatedAt DESC"
+  }
+  else if (sort === "controversial") {
+    askSQL = "contScore DESC, postCreatedAt DESC"
+  }
+  else {
+    askSQL = "postCreatedAt DESC"
+  }
+    //^the last else condition here makes it so if no query or a different query is passed we just sort by new
   conn.query(`
         SELECT *, posts.selftext, COALESCE(sum(votes.vote), 0) AS score, posts.id AS postID, users.username,
-        score/TIMEDIFF(NOW(), posts.createdAt) AS hotScore,
-        posts.createdAt as postCreatedAt
+        COALESCE(COALESCE(sum(votes.vote), 0))/TIMEDIFF(NOW(), posts.createdAt) AS hotScore,
+        posts.createdAt as postCreatedAt,
+        COALESCE(IF(SUM(CASE WHEN votes.vote=1 THEN 1 ELSE 0 END) < SUM(CASE WHEN votes.vote=-1 THEN 1 ELSE 0 END),
+        COUNT(votes.vote) * (SUM(CASE WHEN votes.vote=1 THEN 1 ELSE 0 END) / SUM(CASE WHEN votes.vote=-1 THEN 1 ELSE 0 END)),
+        COUNT(votes.vote) * (SUM(CASE WHEN votes.vote=-1 THEN 1 ELSE 0 END)) / SUM(CASE WHEN votes.vote=1 THEN 1 ELSE 0 END)), 
+        0) AS contScore
         FROM posts 
         LEFT JOIN votes ON posts.id = votes.postId
         JOIN users ON posts.userId = users.id
@@ -33,7 +46,7 @@ var getHomepage = function(sort, callback) {
         GROUP BY posts.id
         ORDER BY ${askSQL}
         `,
-    function(err, results) { 
+    function(err, results) {
       if (err) {
         callback(err);
       }
@@ -141,8 +154,8 @@ var createPost = function(post, callback) {
   );
 };
 
-var deletePost = function(postname, callback){
-  conn.query(`DELETE FROM posts WHERE title = '${postname}' LIMIT 1`, function(err, result){
+var deletePost = function(postname, callback) {
+  conn.query(`DELETE FROM posts WHERE title = '${postname}' LIMIT 1`, function(err, result) {
     callback(result)
   })
 }
@@ -232,40 +245,58 @@ var createSessionToken = function() {
   return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
 }
 
-var createSession = function (userId, callback) {
+var createSession = function(userId, callback) {
   var token = createSessionToken();
   conn.query('INSERT INTO sessions SET userId = ?, token = ?', [userId, token], function(err, result) {
     if (err) {
       callback(err);
     }
     else {
-      callback(null, token); 
+      callback(null, token);
     }
   });
 }
 
-var getUserFromSession = function (sessionToken, callback){
-  conn.query(`select distinct users.* from sessions JOIN users ON users.id = sessions.userId where token = ?`, [sessionToken], function(err,result){
-    if (err){
+var getUserFromSession = function(sessionToken, callback) {
+  conn.query(`select distinct users.* from sessions JOIN users ON users.id = sessions.userId where token = ?`, [sessionToken], function(err, result) {
+    if (err) {
       callback(err)
     }
-    else{
-    callback(null, result[0])
+    else {
+      callback(null, result[0])
     }
   })
 }
 
-var votePost = function(vote, postId, userId, callback){
-  conn.query('INSERT INTO votes SET vote = ?, postId = ?, userId = ?', [vote, postId, userId], function(err, result) {
-    if (err) {
-      callback(err);
+var votePost = function(vote, postId, userId, callback) {
+  
+    //Make a query to database check if user already voted for given post with 
+  //given value. If he did already vote, modify the behavior of votePost.
+  conn.query('SELECT * FROM votes where vote = ? AND postId = ? AND userId = ?', [vote,postId, userId],
+  function(err, result){
+    //result is empty array if there's nothing
+    //If it already exists object can be accessed as result[0].id/vote/postId/userId
+    if (result.length > 0){
+      console.log(result, "WOW WE REACHED THIS SHIT");
     }
     else {
-      callback(null, result); 
+      console.log("==", result, "==");
     }
-  });
+    
+  })
+  
+  conn.query('INSERT INTO votes SET vote = ?, postId = ?, userId = ? ON DUPLICATE KEY UPDATE vote=?', 
+  [vote, postId, userId, vote], function(err, result) {
+          if (err) {
+            callback(err);
+          }
+          else {
+            callback(null, result);
+          }
+        })
+      
 }
 
-module.exports = {
-  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost, votePost
-};
+    module.exports = {
+      getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost, votePost
+    };

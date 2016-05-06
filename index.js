@@ -78,7 +78,9 @@ app.get('/', function(req, res) {
 });
 
 app.post('/vote', function(req, res) {
-  console.log(req.loggedInUser);
+  console.log(req.body, req.loggedInUser.id);
+  
+  
   redditAPI.votePost(req.body.vote, req.body.postId, req.loggedInUser.id, function(post) {
     res.redirect('/')
   })
