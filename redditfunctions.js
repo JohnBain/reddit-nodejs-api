@@ -270,21 +270,7 @@ var getUserFromSession = function(sessionToken, callback) {
 
 var votePost = function(vote, postId, userId, callback) {
   
-    //Make a query to database check if user already voted for given post with 
-  //given value. If he did already vote, modify the behavior of votePost.
-  conn.query('SELECT * FROM votes where vote = ? AND postId = ? AND userId = ?', [vote,postId, userId],
-  function(err, result){
-    //result is empty array if there's nothing
-    //If it already exists object can be accessed as result[0].id/vote/postId/userId
-    if (result.length > 0){
-      console.log(result, "WOW WE REACHED THIS SHIT");
-    }
-    else {
-      console.log("==", result, "==");
-    }
     
-  })
-  
   conn.query('INSERT INTO votes SET vote = ?, postId = ?, userId = ? ON DUPLICATE KEY UPDATE vote=?', 
   [vote, postId, userId, vote], function(err, result) {
           if (err) {

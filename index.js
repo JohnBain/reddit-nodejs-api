@@ -56,6 +56,11 @@ app.get('/', function(req, res) {
   <button type="submit"><img src="../images/uparrow.png"></button>
   </form>
   <form action="/vote" method="post">
+  <input type="hidden" name="vote" value="0">
+  <input type="hidden" name="postId" value="${post.id}">
+  <button type="submit"><img src="../images/cancel.png"></button>
+  </form>
+  <form action="/vote" method="post">
   <input type="hidden" name="vote" value="-1">
   <input type="hidden" name="postId" value="${post.id}">
   <button type="submit"><img src="../images/downarrow.png"></button>
