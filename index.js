@@ -53,56 +53,52 @@ app.use(checkLoginToken);
 function renderLayout(content) {
   console.log(content)
   return `<!doctype><html><head><title>" + "Reddit Homepage" + "</title><link rel="stylesheet" type="text/css" href="../css/main.css"></head>
-            <div id="contents"> 
-            <div class="upperDiv">
-            <nav>
+
+            <body class="HolyGrail">
+            <section class="HolyGrail-body">
+            <nav class="HolyGrail-nav">
             <ul>
             <li>/r/FakeSubreddit</li>
             <li>/r/ConspiracyTheories</li>
             <li>/r/TrudeauIsMyBro</li></ul>
             </nav>
-            <h1>Fake Reddit Homepage</h1>
-            </div>
-            <div class="sideDiv">
-            <ul>
-            <li><a href="/signup">signup</la</li>
-            <li><a href="/login">login</la</li>
-            <li><a href="/createpost">create a post</la</li>
-            <li><a href="/login">login</la</li>
-            </ul>
-            </div>
-            <ul class="contents-list">
+
             ${content} 
-  <footer>created by John Bain</footer> </html>`
+  `
 }
 
 
 app.get('/', function(req, res) {
   redditAPI.getHomepage(req.query.sort, function(result) { //This is where we pass the sorting query
-    var finalstring = `You are logged in as ${req.loggedInUser.username}`
+    var finalstring = `
+    <section class="bandC">
+    <main class="HolyGrail-content">
+     
+    <p>You are logged in as ${req.loggedInUser.username}</p>`
     
     result.forEach(function(post) { ///REUSEABLE CONTENT
-      finalstring += `<li class="content-item">
-        <div class="godzilla">
-        <div id="votes">
-          <form action="/vote" method="post">
-          <input type="hidden" name="vote" value="1">
-          <input type="hidden" name="postId" value="${post.id}">
-          <button type="submit"><img src="../images/uparrow.png"></button>
-          </form>
-          <form action="/vote" method="post">
-          <input type="hidden" name="vote" value="0">
-          <input type="hidden" name="postId" value="${post.id}">
-          <button type="submit"><img src="../images/cancel.png"></button>
-          </form>
-          <form action="/vote" method="post">
-           <input type="hidden" name="vote" value="-1">
-          <input type="hidden" name="postId" value="${post.id}">
-           <button type="submit"><img src="../images/downarrow.png"></button>
-        </form>
-        </div>
+      finalstring += `
+      <li class="content-item">
+        <section class="godzilla">
+            <div id="votes">
+              <form action="/vote" method="post">
+              <input type="hidden" name="vote" value="1">
+              <input type="hidden" name="postId" value="${post.id}">
+              <button type="submit"><img src="../images/uparrow.png"></button>
+              </form>
+              <form action="/vote" method="post">
+              <input type="hidden" name="vote" value="0">
+              <input type="hidden" name="postId" value="${post.id}">
+              <button type="submit"><img src="../images/cancel.png"></button>
+              </form>
+              <form action="/vote" method="post">
+               <input type="hidden" name="vote" value="-1">
+              <input type="hidden" name="postId" value="${post.id}">
+               <button type="submit"><img src="../images/downarrow.png"></button>
+              </form>
+            </div>
       
-  <div id="post">
+    <div id="post">
       <h2 class='${post.title}'>
         <p>${post.score} <a href='${post.url}'/>${post.title}</a>
       </h2>
@@ -111,7 +107,16 @@ app.get('/', function(req, res) {
     `
     })
 
-    finalstring += "</li> </ul> </div>"
+    finalstring += `</li> </ul></section></main>    <aside class="HolyGrail-ads">
+            <ul>
+            <li><a href="/signup">signup</la</li>
+            <li><a href="/login">login</la</li>
+            <li><a href="/createpost">create a post</la</li>
+            <li><a href="/login">login</la</li>
+            </ul>
+            </aside></section>
+      </section>
+    `
     
     res.send(renderLayout(finalstring))
 

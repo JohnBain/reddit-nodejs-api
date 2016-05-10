@@ -18,19 +18,6 @@ body {
 
 
 
-h1 {
-    font-family: Verdana;
-}
-
-form {
-    height: 15px;
-    width: 35px;
-}
-
-li {
-    list-style-type: none;
-}
-
 .godzilla {
     display: flex;
     justify-content: flex-start ;
@@ -45,36 +32,50 @@ li {
     align-items: flex-start;
 }
 
-nav {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-nav ul {
-            list-style: none;
-            display:flex;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            background-color: rgba(132,200,250,0.3)
- }
- 
- nav ul li {
-     padding-left: 20px;
- }
- 
 
 
-.sidebar {
-    display:flex;
-    flex-direction: row;
+
+
+body {
+    margin: 0;
+}
+.HolyGrail {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
 }
 
+.HolyGrail-body {
+  /*display: flex;
+  flex: 1;*/
+}
 
-.sideDiv{
-position:absolute;
-position: fixed;
-right:0;
-top:0;
+.HolyGrail-content {
+  flex: 1;
+  background-color: red;
+}
+
+.HolyGrail-nav, .HolyGrail-ads {
+  /* 12em is the width of the columns */
+  flex: 0 0 12em;
+}
+
+.HolyGrail-nav ul {
+    margin: 0px;
+}
+
+.HolyGrail-ads {
+    background-color:beige;
+    
+}
+
+.HolyGrail-nav {
+  /* put the nav on the left */
+  order: -1;
+  background-color: blue;
+}
+
+.bandC {
+    display:flex;
+    flex-direction: row;
 }
