@@ -11,7 +11,16 @@ var conn = mysql.createConnection({
   database: 'reddit'
 });
 
-var getHomepage = function(sort, callback) {
+var getHomepage = function(options, callback) {
+      if (!callback) {
+        callback = options;
+        options = {};
+      }
+      var subreddit = options.subreddit || 4;
+      var sort = options.sort || "top"
+      var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
+      var offset = (options.page || 0) * limit;
+      
   var askSQL = "";
 
   if (sort === "top") {
@@ -42,13 +51,14 @@ var getHomepage = function(sort, callback) {
         LEFT JOIN votes ON posts.id = votes.postId
         JOIN users ON posts.userId = users.id
         JOIN subreddits ON posts.subredditId = subreddits.id
-        WHERE subredditId = 3
+        WHERE subredditId = ?
         GROUP BY posts.id
         ORDER BY ${askSQL}
-        `,
+        LIMIT ? OFFSET ?
+        `, [subreddit, limit, offset],
     function(err, results) {
       if (err) {
-        callback(err);
+        callback(err);  //subredditId up there should be a =?!
       }
       else {
         var x = results.map(function(post) {

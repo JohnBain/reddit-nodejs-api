@@ -51,7 +51,6 @@ app.use(checkLoginToken);
 
 
 function renderLayout(content) {
-  console.log(content)
   return `<!doctype><html><head><title>" + "Reddit Homepage" + "</title><link rel="stylesheet" type="text/css" href="../css/main.css">
           <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
           <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
@@ -79,10 +78,14 @@ function renderLayout(content) {
 
 
 app.get('/', function(req, res) {
-  redditAPI.getHomepage(req.query.sort, function(result) { //This is where we pass the sorting query
+  
+  var options = {subreddit:req.query.subreddit};
+  console.log(req.query.subreddit)
+  
+  redditAPI.getHomepage(options, function(result) { //This is where we pass the sorting query
     var finalstring = `You are logged in as ${req.loggedInUser.username}<br>
-    <a href="/?=sort=hot">hot</a> <a href="/?=sort=top">top</a> <a href="/?=sort=new">new</a>
-    <a href="/?=sort=hot">controversial</a>`
+    <a href="/?sort=hot">hot</a> <a href="/?sort=top">top</a> <a href="/?sort=new">new</a>
+    <a href="/?sort=controversial">controversial</a>`
 
     result.forEach(function(post) {///REUSEABLE CONTENT
 
@@ -132,8 +135,6 @@ app.get('/', function(req, res) {
 });
 
 app.post('/vote', function(req, res) {
-  console.log(req.body, req.loggedInUser.id);
-
 
   redditAPI.votePost(req.body.vote, req.body.postId, req.loggedInUser.id, function(post) {
     res.redirect('/')
@@ -207,6 +208,7 @@ app.get('/createpost', function(request, response) {
 })
 
 app.post('/createpost', function(request, response) {
+  console.log(request);
     // before creating content, check if the user is logged in
     if (!request.loggedInUser) {
       // HTTP status code 401 means Unauthorized
@@ -218,7 +220,7 @@ app.post('/createpost', function(request, response) {
         userId: request.loggedInUser.id,
         title: request.body.title,
         url: request.body.url,
-        subredditId: 3,
+        subredditId: 4, //Change to reflect subreddit Id
         selftext: request.body.selftext //We're limiting ourselves to the homepage for now
       }, function(err, post) {
         response.redirect('/')
