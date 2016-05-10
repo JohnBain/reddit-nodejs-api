@@ -66,15 +66,18 @@ nav ul {
  
 
 
-.sidebar {
-    display:flex;
-    flex-direction: row;
+.bigContainer {
+    display: flex;
+    flex-flow: row nowrap;
+    width: 100%;
 }
 
+.contentContainer {
+    order: 0;
+}
 
-.sideDiv{
-position:absolute;
-position: fixed;
-right:0;
-top:0;
+.sideContainer {
+    order: -1;
+    justify-content: flex-end;
+    align-items: flex-end;
 }

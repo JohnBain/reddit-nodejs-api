@@ -52,7 +52,12 @@ app.use(checkLoginToken);
 
 function renderLayout(content) {
   console.log(content)
-  return `<!doctype><html><head><title>" + "Reddit Homepage" + "</title><link rel="stylesheet" type="text/css" href="../css/main.css"></head>
+  return `<!doctype><html><head><title>" + "Reddit Homepage" + "</title><link rel="stylesheet" type="text/css" href="../css/main.css">
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+          <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+          <script type="text/javascript" src="../js/main.js"></script>
+         
+          </head>
             <div id="contents"> 
             <div class="upperDiv">
             <nav>
@@ -63,15 +68,11 @@ function renderLayout(content) {
             </nav>
             <h1>Fake Reddit Homepage</h1>
             </div>
-            <div class="sideDiv">
-            <ul>
-            <li><a href="/signup">signup</la</li>
-            <li><a href="/login">login</la</li>
-            <li><a href="/createpost">create a post</la</li>
-            <li><a href="/login">login</la</li>
-            </ul>
-            </div>
+            <section class="bigContainer">
+            
+            <div class="contentContainer">
             <ul class="contents-list">
+            
             ${content} 
   <footer>created by John Bain</footer> </html>`
 }
@@ -79,16 +80,19 @@ function renderLayout(content) {
 
 app.get('/', function(req, res) {
   redditAPI.getHomepage(req.query.sort, function(result) { //This is where we pass the sorting query
-    var finalstring = `You are logged in as ${req.loggedInUser.username}`
-    
-    result.forEach(function(post) { ///REUSEABLE CONTENT
+    var finalstring = `You are logged in as ${req.loggedInUser.username}<br>
+    <a href="/?=sort=hot">hot</a> <a href="/?=sort=top">top</a> <a href="/?=sort=new">new</a>
+    <a href="/?=sort=hot">controversial</a>`
+
+    result.forEach(function(post) {///REUSEABLE CONTENT
+
       finalstring += `<li class="content-item">
         <div class="godzilla">
         <div id="votes">
           <form action="/vote" method="post">
           <input type="hidden" name="vote" value="1">
           <input type="hidden" name="postId" value="${post.id}">
-          <button type="submit"><img src="../images/uparrow.png"></button>
+          <button type="submit"><img class="uparrow" src="../images/uparrow.png"></button>
           </form>
           <form action="/vote" method="post">
           <input type="hidden" name="vote" value="0">
@@ -98,7 +102,7 @@ app.get('/', function(req, res) {
           <form action="/vote" method="post">
            <input type="hidden" name="vote" value="-1">
           <input type="hidden" name="postId" value="${post.id}">
-           <button type="submit"><img src="../images/downarrow.png"></button>
+           <button type="submit"><img class = "downarrow" src="../images/downarrow.png"></button>
         </form>
         </div>
       
@@ -111,7 +115,16 @@ app.get('/', function(req, res) {
     `
     })
 
-    finalstring += "</li> </ul> </div>"
+    finalstring += `</li> </ul> </div>
+    <div class="sideContainer">
+            <ul>
+            <li><a href="/signup">signup</la</li>
+            <li><a href="/login">login</la</li>
+            <li><a href="/createpost">create a post</la</li>
+            <li><a href="/login">login</la</li>
+            </ul>
+    </div>
+    </section>`
     
     res.send(renderLayout(finalstring))
 
