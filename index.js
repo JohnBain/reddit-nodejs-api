@@ -40,32 +40,67 @@ function checkLoginToken(request, response, next) {
 
 app.use(checkLoginToken);
 
+// app.get('/controlpanel', function(request, response) {
+//   if (!request.loggedInUser || request.loggedInUser.isAdmin === 0) {
+//     response.status(401).send('Administrators only!');
+//   }
+//   if (request.loggedInUser.isAdmin === 1) {
+//     response.sendFile('/home/ubuntu/workspace/controlpanel.html')
+//   }
+// });
+
+
+function renderLayout(content) {
+  console.log(content)
+  return `<!doctype><html><head><title>" + "Reddit Homepage" + "</title><link rel="stylesheet" type="text/css" href="../css/main.css"></head>
+            <div id="contents"> 
+            <div class="upperDiv">
+            <nav>
+            <ul>
+            <li>/r/FakeSubreddit</li>
+            <li>/r/ConspiracyTheories</li>
+            <li>/r/TrudeauIsMyBro</li></ul>
+            </nav>
+            <h1>Fake Reddit Homepage</h1>
+            </div>
+            <div class="sideDiv">
+            <ul>
+            <li><a href="/signup">signup</la</li>
+            <li><a href="/login">login</la</li>
+            <li><a href="/createpost">create a post</la</li>
+            <li><a href="/login">login</la</li>
+            </ul>
+            </div>
+            <ul class="contents-list">
+            ${content} 
+  <footer>created by John Bain</footer> </html>`
+}
+
+
 app.get('/', function(req, res) {
   redditAPI.getHomepage(req.query.sort, function(result) { //This is where we pass the sorting query
-    var finalstring = `<div id="contents">
-    <h1>Fake Reddit Homepage</h1>
-    <ul class="contents-list">`
-    result.forEach(function(post) {
+    var finalstring = `You are logged in as ${req.loggedInUser.username}`
+    
+    result.forEach(function(post) { ///REUSEABLE CONTENT
       finalstring += `<li class="content-item">
-  
-  <div class="godzilla">
-  <div id="votes">
-  <form action="/vote" method="post">
-  <input type="hidden" name="vote" value="1">
-  <input type="hidden" name="postId" value="${post.id}">
-  <button type="submit"><img src="../images/uparrow.png"></button>
-  </form>
-  <form action="/vote" method="post">
-  <input type="hidden" name="vote" value="0">
-  <input type="hidden" name="postId" value="${post.id}">
-  <button type="submit"><img src="../images/cancel.png"></button>
-  </form>
-  <form action="/vote" method="post">
-  <input type="hidden" name="vote" value="-1">
-  <input type="hidden" name="postId" value="${post.id}">
-  <button type="submit"><img src="../images/downarrow.png"></button>
-  </form>
-  </div>
+        <div class="godzilla">
+        <div id="votes">
+          <form action="/vote" method="post">
+          <input type="hidden" name="vote" value="1">
+          <input type="hidden" name="postId" value="${post.id}">
+          <button type="submit"><img src="../images/uparrow.png"></button>
+          </form>
+          <form action="/vote" method="post">
+          <input type="hidden" name="vote" value="0">
+          <input type="hidden" name="postId" value="${post.id}">
+          <button type="submit"><img src="../images/cancel.png"></button>
+          </form>
+          <form action="/vote" method="post">
+           <input type="hidden" name="vote" value="-1">
+          <input type="hidden" name="postId" value="${post.id}">
+           <button type="submit"><img src="../images/downarrow.png"></button>
+        </form>
+        </div>
       
   <div id="post">
       <h2 class='${post.title}'>
@@ -73,19 +108,20 @@ app.get('/', function(req, res) {
       </h2>
       <p>Created by ${post.user} at ${post.createdAt}</p>
     </div>
-    </div>`
+    `
     })
 
     finalstring += "</li> </ul> </div>"
-    res.send(createHead(finalstring))
+    
+    res.send(renderLayout(finalstring))
 
   })
 });
 
 app.post('/vote', function(req, res) {
   console.log(req.body, req.loggedInUser.id);
-  
-  
+
+
   redditAPI.votePost(req.body.vote, req.body.postId, req.loggedInUser.id, function(post) {
     res.redirect('/')
   })
