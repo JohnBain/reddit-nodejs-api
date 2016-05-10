@@ -16,7 +16,7 @@ var getHomepage = function(options, callback) {
         callback = options;
         options = {};
       }
-      var subreddit = options.subreddit || 4;
+      var subreddit = 4;
       var sort = options.sort || "top"
       var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
       var offset = (options.page || 0) * limit;
@@ -40,7 +40,8 @@ var getHomepage = function(options, callback) {
   }
     //^the last else condition here makes it so if no query or a different query is passed we just sort by new
   conn.query(`
-        SELECT *, posts.selftext, COALESCE(sum(votes.vote), 0) AS score, posts.id AS postID, users.username,
+        SELECT *, posts.selftext, COALESCE(sum(votes.vote), 0) AS score, posts.id AS postID, users.username AS username,
+        subreddits.name AS subredditName, subredditId,
         COALESCE(COALESCE(sum(votes.vote), 0))/TIMEDIFF(NOW(), posts.createdAt) AS hotScore,
         posts.createdAt as postCreatedAt,
         COALESCE(IF(SUM(CASE WHEN votes.vote=1 THEN 1 ELSE 0 END) < SUM(CASE WHEN votes.vote=-1 THEN 1 ELSE 0 END),
@@ -54,8 +55,7 @@ var getHomepage = function(options, callback) {
         WHERE subredditId = ?
         GROUP BY posts.id
         ORDER BY ${askSQL}
-        LIMIT ? OFFSET ?
-        `, [subreddit, limit, offset],
+        `, [subreddit],
     function(err, results) {
       if (err) {
         callback(err);  //subredditId up there should be a =?!
@@ -72,6 +72,8 @@ var getHomepage = function(options, callback) {
             updatedAt: post.updatedAt,
             userId: post.userId,
             user: post.username,
+            subreddit: post.subredditName,
+            subredditId: post.subredditId
           };
         });
         callback(x);
@@ -82,7 +84,8 @@ var getHomepage = function(options, callback) {
 
 var createPost = function(post, callback) {
   conn.query(
-    'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.selftext, post.subredditId, null],
+    'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?)', 
+    [post.userId, post.title, post.url, post.selftext, post.subredditId, null],
     function(err, result) {
       if (err) {
         callback(err);

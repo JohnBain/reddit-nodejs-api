@@ -3,7 +3,7 @@ var app = express();
 var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser')
 var redditAPI = require('./redditfunctions.js')
-var createPost = require('./createpost.js')
+var postForm = require('./createpost.js')
 
 app.use(cookieParser()); // this middleware will add a `cookies` property to the request, an object of key:value pairs for all the cookies we set
 app.use(bodyParser());
@@ -50,8 +50,17 @@ app.use(checkLoginToken);
 // });
 
 
-function renderLayout(content) {
-  return `<!doctype><html><head><title>" + "Reddit Homepage" + "</title><link rel="stylesheet" type="text/css" href="../css/main.css">
+
+
+
+app.get('/', function(req, res) {
+  if (!req.query.subreddit) 
+  {req.query.subreddit = 3};
+  var options = {subreddit:req.query.subreddit};
+
+  redditAPI.getHomepage(options, function(result) { //This is where we pass the sorting query
+    var finalstring = `
+    <!doctype><html><head><title>" + "Reddit Homepage" + "</title><link rel="stylesheet" type="text/css" href="../css/main.css">
           <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
           <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
           <script type="text/javascript" src="../js/main.js"></script>
@@ -72,19 +81,14 @@ function renderLayout(content) {
             <div class="contentContainer">
             <ul class="contents-list">
             
-            ${content} 
-  <footer>created by John Bain</footer> </html>`
-}
-
-
-app.get('/', function(req, res) {
-  
-  var options = {subreddit:req.query.subreddit};
-  console.log(req.query.subreddit)
-  
-  redditAPI.getHomepage(options, function(result) { //This is where we pass the sorting query
-    var finalstring = `You are logged in as ${req.loggedInUser.username}<br>
-    <a href="/?sort=hot">hot</a> <a href="/?sort=top">top</a> <a href="/?sort=new">new</a>
+    
+    
+    
+    
+    You are logged in as ${req.loggedInUser.username}<br>
+    <a href="/?sort=hot">hot</a> 
+    <a href="/?sort=top">top</a> 
+    <a href="/?sort=new">new</a>
     <a href="/?sort=controversial">controversial</a>`
 
     result.forEach(function(post) {///REUSEABLE CONTENT
@@ -113,7 +117,7 @@ app.get('/', function(req, res) {
       <h2 class='${post.title}'>
         <p>${post.score} <a href='${post.url}'/>${post.title}</a>
       </h2>
-      <p>Created by ${post.user} at ${post.createdAt}</p>
+      <p>Created by ${post.user} in ${post.subreddit} at ${post.createdAt}</p>
     </div>
     `
     })
@@ -123,13 +127,13 @@ app.get('/', function(req, res) {
             <ul>
             <li><a href="/signup">signup</la</li>
             <li><a href="/login">login</la</li>
-            <li><a href="/createpost">create a post</la</li>
+            <li><a href="/createpost?subreddit=${req.query.subreddit}">create a post</la</li>
             <li><a href="/login">login</la</li>
             </ul>
     </div>
-    </section>`
-    
-    res.send(renderLayout(finalstring))
+    </section>
+    <footer>created by John Bain</footer> </html>`
+    res.send(finalstring)
 
   })
 });
@@ -201,28 +205,33 @@ app.post('/controlpanel', function(request, response) {
 });
 
 app.get('/createpost', function(request, response) {
+  console.log(request.url, "THIS MOFO")
+    console.log(request.subreddit)
+
   if (!request.loggedInUser) {
     response.status(401).send('You must be logged in to create content!');
   }
-  response.send(createPost(request.loggedInUser.username))
+  response.send(postForm(request.loggedInUser.username, request.url))
 })
 
 app.post('/createpost', function(request, response) {
-  console.log(request);
+  console.log(request.body, 'this should be the query');
     // before creating content, check if the user is logged in
     if (!request.loggedInUser) {
       // HTTP status code 401 means Unauthorized
       response.status(401).send('You must be logged in to create content!');
     }
     else {
+      console.log(request.url)
       // here we have a logged in user, let's create the post with the user!
       redditAPI.createPost({
         userId: request.loggedInUser.id,
         title: request.body.title,
         url: request.body.url,
-        subredditId: 4, //Change to reflect subreddit Id
+        subredditId: Number(request.query.subreddit), //Change to reflect subreddit Id
         selftext: request.body.selftext //We're limiting ourselves to the homepage for now
       }, function(err, post) {
+        console.log(post)
         response.redirect('/')
       })
     }
