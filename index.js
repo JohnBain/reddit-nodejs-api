@@ -95,17 +95,17 @@ app.get('/', function(req, res) {
       finalstring += `<li class="content-item">
         <div class="godzilla">
         <div id="votes">
-          <form class="upvote" action="/vote" method="post">
+          <form class="vote" action="/vote" method="post">
           <input type="hidden" name="vote" value="1">
           <input type="hidden" name="postId" value="${post.id}">
           <button type="submit"><img class="uparrow" src="../images/uparrow.png"></button>
           </form>
-          <form class="cancel" action="/vote" method="post">
+          <form class="vote" action="/vote" method="post">
           <input type="hidden" name="vote" value="0">
           <input type="hidden" name="postId" value="${post.id}">
           <button type="submit"><img src="../images/cancel.png"></button>
           </form>
-          <form class="downvote" action="/vote" method="post">
+          <form class="vote" action="/vote" method="post">
            <input type="hidden" name="vote" value="-1">
           <input type="hidden" name="postId" value="${post.id}">
            <button type="submit"><img class = "downarrow" src="../images/downarrow.png"></button>
@@ -138,11 +138,19 @@ app.get('/', function(req, res) {
 });
 
 app.post('/vote', function(req, res) {
-
   redditAPI.votePost(req.body.vote, req.body.postId, req.loggedInUser.id, function(post) {
     res.redirect('/')
   })
 });
+
+app.get('/vote', function(req, res) {
+  console.log("Placeholder")
+  
+  //select posts.id, posts.title, sum(vote) from votes LEFT JOIN posts ON posts.id=votes.postId GROUP BY postId;  
+  //This is how you find score
+  
+  //select posts.subredditId, posts.id, posts.title, sum(vote) AS score from votes LEFT JOIN posts ON posts.id=votes.postId WHERE postId=8;
+})
 
 
 app.get('/signup', function(req, res) {
@@ -207,23 +215,23 @@ app.get('/createpost', function(request, response) {
   if (!request.loggedInUser) {
     response.status(401).send('You must be logged in to create content!');
   }
-  response.send(createPost(request.loggedInUser.username))
+  response.send(createPost(request.loggedInUser.username, request.query.subreddit)) //broken
 })
 
 app.post('/createpost', function(request, response) {
     // before creating content, check if the user is logged in
-    console.log(request.body)
     if (!request.loggedInUser) {
       // HTTP status code 401 means Unauthorized
       response.status(401).send('You must be logged in to create content!');
     }
     else {
+      console.log(request.body);
       // here we have a logged in user, let's create the post with the user!
       redditAPI.createPost({
         userId: request.loggedInUser.id,
         title: request.body.title,
         url: request.body.url,
-        subredditId: 4, //Change to reflect subreddit Id
+        subredditId: 4, //No idea how to change this to reflect subreddit Id
         selftext: request.body.selftext //We're limiting ourselves to the homepage for now
       }, function(err, post) {
         response.redirect('/')

@@ -12,15 +12,15 @@ var conn = mysql.createConnection({
 });
 
 var getHomepage = function(options, callback) {
-      if (!callback) {
-        callback = options;
-        options = {};
-      }
-      var subreddit = options.subreddit || 4;
-      var sort = options.sort || "top"
-      var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
-      var offset = (options.page || 0) * limit;
-      
+  if (!callback) {
+    callback = options;
+    options = {};
+  }
+  var subreddit = options.subreddit || 4;
+  var sort = options.sort || "top"
+  var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
+  var offset = (options.page || 0) * limit;
+
   var askSQL = "";
 
   if (sort === "top") {
@@ -38,7 +38,7 @@ var getHomepage = function(options, callback) {
   else {
     askSQL = "postCreatedAt DESC"
   }
-    //^the last else condition here makes it so if no query or a different query is passed we just sort by new
+  //^the last else condition here makes it so if no query or a different query is passed we just sort by new
   conn.query(`
         SELECT *, posts.selftext, COALESCE(sum(votes.vote), 0) AS score, posts.id AS postID, users.username,
         COALESCE(COALESCE(sum(votes.vote), 0))/TIMEDIFF(NOW(), posts.createdAt) AS hotScore,
@@ -59,7 +59,7 @@ var getHomepage = function(options, callback) {
         `, [subreddit, limit, offset],
     function(err, results) {
       if (err) {
-        callback(err);  //subredditId up there should be a =?!
+        callback(err); //subredditId up there should be a =?!
       }
       else {
         var x = results.map(function(post) {
@@ -139,6 +139,7 @@ var getAllPosts = function(callback) {
 }
 
 var createPost = function(post, callback) {
+  console.log(post, "HERE IS POST")
   conn.query(
     'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, post.selftext, null],
     function(err, result) {
@@ -281,20 +282,31 @@ var getUserFromSession = function(sessionToken, callback) {
 }
 
 var votePost = function(vote, postId, userId, callback) {
-  
-    
-  conn.query('INSERT INTO votes SET vote = ?, postId = ?, userId = ? ON DUPLICATE KEY UPDATE vote=?', 
-  [vote, postId, userId, vote], function(err, result) {
-          if (err) {
-            callback(err);
-          }
-          else {
-            callback(null, result);
-          }
-        })
-      
+
+
+  conn.query('INSERT INTO votes SET vote = ?, postId = ?, userId = ? ON DUPLICATE KEY UPDATE vote=?', [vote, postId, userId, vote], function(err, result) {
+    if (err) {
+      callback(err);
+    }
+    else {
+      callback(null, result);
+    }
+  })
+
 }
 
-    module.exports = {
-      getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost, votePost
-    };
+var seePostScore = function(postId, callback) {
+  conn.query(`select posts.subredditId, posts.id, posts.title, sum(vote) AS score from votes 
+  LEFT JOIN posts ON posts.id=votes.postId WHERE postId=?`, [postId], function(err, result) {
+    if (err) {
+      callback(err)
+    }
+    else {
+      callback(null, result)
+    }
+  })
+}
+
+module.exports = {
+  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost, votePost, seePostScore
+};
