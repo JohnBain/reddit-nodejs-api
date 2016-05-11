@@ -10,8 +10,13 @@ $(document).ready(function() {
         }
         console.log(item)
         $.post('/vote', item, function(){
-            console.log("We succeeded")
+            $.get('/vote', function(res){
+                console.log(res, "THIS SHOULD BE THE SHIT")
+            console.log("We're in the get method")
+        })
         });
+        
+        
        
     })
 });

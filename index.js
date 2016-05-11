@@ -139,12 +139,15 @@ app.get('/', function(req, res) {
 
 app.post('/vote', function(req, res) {
   redditAPI.votePost(req.body.vote, req.body.postId, req.loggedInUser.id, function(post) {
-    res.redirect('/')
+    res.redirect(`/vote?postId=${req.body.postId}`)
   })
 });
 
 app.get('/vote', function(req, res) {
-  console.log("Placeholder")
+  redditAPI.seePostScore(req.query.postId, function(post) {
+    console.log(post)
+    res.send(post)
+  })
   
   //select posts.id, posts.title, sum(vote) from votes LEFT JOIN posts ON posts.id=votes.postId GROUP BY postId;  
   //This is how you find score
@@ -154,7 +157,7 @@ app.get('/vote', function(req, res) {
 
 
 app.get('/signup', function(req, res) {
-  res.sendFile('/home/ubuntu/workspace/signup.html')
+  renderLayout(res.sendFile('/home/ubuntu/workspace/signup.html'))
 })
 
 app.post('/signup', function(req, res) {

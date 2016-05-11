@@ -2,6 +2,8 @@ var mysql = require('mysql');
 var bcrypt = require('bcrypt');
 var secureRandom = require('secure-random');
 var HASH_ROUNDS = 10;
+var sequelize = require('sequelize');
+
 
 // create a connection to our Cloud9 server
 var conn = mysql.createConnection({
@@ -282,8 +284,6 @@ var getUserFromSession = function(sessionToken, callback) {
 }
 
 var votePost = function(vote, postId, userId, callback) {
-
-
   conn.query('INSERT INTO votes SET vote = ?, postId = ?, userId = ? ON DUPLICATE KEY UPDATE vote=?', [vote, postId, userId, vote], function(err, result) {
     if (err) {
       callback(err);
@@ -296,13 +296,15 @@ var votePost = function(vote, postId, userId, callback) {
 }
 
 var seePostScore = function(postId, callback) {
-  conn.query(`select posts.subredditId, posts.id, posts.title, sum(vote) AS score from votes 
+  console.log("seePostScore gets this postId:", postId);
+  conn.query(`select sum(vote) AS score from votes 
   LEFT JOIN posts ON posts.id=votes.postId WHERE postId=?`, [postId], function(err, result) {
     if (err) {
       callback(err)
     }
     else {
-      callback(null, result)
+      console.log(result, "Here is result")
+      callback(result)
     }
   })
 }
