@@ -6,6 +6,11 @@ body {
 
 .aside {
     order: -1;
+    padding: 9em 0em;
+}
+
+.aside li:hover {
+    text-shadow: 2px -2px grey;
 }
 
 .flexContainer {
