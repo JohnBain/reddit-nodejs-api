@@ -1,22 +1,16 @@
 body {
-    
-    
     background-color: beige;
     /*background-image: url('http://3.bp.blogspot.com/-k5PJl1lGtHM/T_T87wH4stI/AAAAAAAAFAM/UsmaEvYB6Sw/s1600/Donald+Duck+Wallpapers+6.jpg')*/
 }
 
-
-
 .flexContainer {
-    display:flex;
+    display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
     justify-content: flex-end;
     align-content: space-around;
     align-items: center;
 }
-
-
 
 h1 {
     font-family: Verdana;
@@ -33,11 +27,11 @@ li {
 
 .godzilla {
     display: flex;
-    justify-content: flex-start ;
+    justify-content: flex-start;
 }
 
 #contents {
-    display:flex;
+    display: flex;
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -46,25 +40,23 @@ li {
 }
 
 nav {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
+    position: absolute;
+    top: 0;
+    left: 0;
+}
 
 nav ul {
-            list-style: none;
-            display:flex;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            background-color: rgba(132,200,250,0.3)
- }
- 
- nav ul li {
-     padding-left: 20px;
- }
- 
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    background-color: rgba(132, 200, 250, 0.3)
+}
 
+nav ul li {
+    padding-left: 20px;
+}
 
 .bigContainer {
     display: flex;
@@ -80,4 +72,28 @@ nav ul {
     order: -1;
     justify-content: flex-end;
     align-items: flex-end;
+}
+
+@keyframes spin {
+    from {
+        transform: rotateZ(0);
+    }
+    to {
+        transform: rotateZ(360deg);
+    }
+}
+
+#spinner {
+    display:none;
+    vertical-align: bottom;
+    border: 3px solid black;
+    border-radius: 50%;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+    width: 15px;
+    height: 15px;
+    animation: spin;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
 }

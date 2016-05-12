@@ -1,24 +1,17 @@
 var express = require('express');
 var app = express();
-var bodyParser = require('body-parser')
-var cookieParser = require('cookie-parser')
-var redditAPI = require('./redditfunctions.js')
-var createPost = require('./createpost.js')
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var redditAPI = require('./redditfunctions.js');
+var createPost = require('./createpost.js');
+var request = require('request');
+var cheerio = require('cheerio');
+var URL = require('url-parse');
+
 
 app.use(cookieParser()); // this middleware will add a `cookies` property to the request, an object of key:value pairs for all the cookies we set
 app.use(bodyParser());
 app.use(express.static('public'))
-
-function createHead(content) {
-  return `
-    <head>
-      <link rel="stylesheet" type="text/css" href="../css/main.css">
-    </head>
-    <body>
-      ${content}
-    </body>
-  `
-}
 
 function checkLoginToken(request, response, next) {
   // check if there's a SESSION cookie...
@@ -75,6 +68,16 @@ function renderLayout(content) {
             <ul class="contents-list">
             
             ${content} 
+            <div class="sideContainer">
+            <ul>
+            <li><a href="/signup">signup</la</li>
+            <li><a href="/login">login</la</li>
+            <li><a href="/createpost">create a post</la</li>
+            <li><a href="/controlpanel">admin console</la</li>
+            </ul>
+            </div>
+    </div>
+    </section>
   <footer>created by John Bain</footer> </html>`
 }
 
@@ -124,16 +127,8 @@ app.get('/', function(req, res) {
     `
     })
 
-    finalstring += `</li> </ul> </div>
-    <div class="sideContainer">
-            <ul>
-            <li><a href="/signup">signup</la</li>
-            <li><a href="/login">login</la</li>
-            <li><a href="/createpost">create a post</la</li>
-            <li><a href="/controlpanel">admin console</la</li>
-            </ul>
-    </div>
-    </section>`
+    finalstring += `</ul> </li> </ul> </div>
+    `
 
     res.send(renderLayout(finalstring))
 
@@ -212,11 +207,11 @@ app.post('/controlpanel', function(request, response) {
   })
 });
 
-app.get('/createpost', function(request, response) {
+app.get('/createpost', function(request, response) {    //headers.referer is URL of referer
   if (!request.loggedInUser) {
     response.status(401).send('You must be logged in to create content!');
   }
-  response.send(createPost(request.loggedInUser.username, request.query.subreddit)) //broken
+  response.send(renderLayout(createPost(request.loggedInUser.username, request.query.subreddit))) //broken
 })
 
 app.post('/createpost', function(request, response) {
@@ -240,7 +235,26 @@ app.post('/createpost', function(request, response) {
     }
   })
   //  'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, post.selftext, null],
-
+app.get('/getTitle', function(req, res) {
+  console.log(req.query)
+    var url = req.query.url;
+    console.log(url)
+    
+    request(url, function(err, response) {
+        if (err) {
+            console.log("Reached the error", err)
+            res.send("");
+        }
+        else {
+          var $ = cheerio.load(response.body);
+          var title = $('title').text()
+          console.log($('title').text())
+           console.log("We have reached the thing")
+                res.send(title); //change
+        }
+        
+    });
+});
 
 /* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
 

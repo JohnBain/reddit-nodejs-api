@@ -85,7 +85,6 @@ var getHomepage = function(options, callback) {
 }
 
 var createPost = function(post, callback) {
-  console.log(post)
   conn.query(
     'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, post.selftext,  null],
     function(err, result) {

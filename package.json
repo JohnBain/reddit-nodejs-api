@@ -13,18 +13,19 @@
     "babel-preset-react": "^6.5.0",
     "bcrypt": "^0.8.6",
     "body-parser": "^1.15.0",
+    "cheerio": "^0.20.0",
     "cookie-parser": "^1.4.1",
     "express": "^4.13.4",
+    "fast-html-parser": "^1.0.1",
+    "html-parser": "^0.9.0",
+    "htmlparser": "^1.7.7",
     "mysql": "^2.10.2",
     "nodemon": "^1.9.2",
     "react": "^15.0.2",
     "react-dom": "^15.0.2",
-    "secure-random": "^1.1.1"
-  }
-}
-
-{
-  "babel": {
-    "presets": ["react"]
+    "request": "^2.72.0",
+    "secure-random": "^1.1.1",
+    "sequelize": "^3.23.0",
+    "url-parse": "^1.1.1"
   }
 }
