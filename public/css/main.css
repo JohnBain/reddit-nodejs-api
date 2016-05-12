@@ -1,6 +1,11 @@
 body {
+    display: flex;
     background-color: beige;
     /*background-image: url('http://3.bp.blogspot.com/-k5PJl1lGtHM/T_T87wH4stI/AAAAAAAAFAM/UsmaEvYB6Sw/s1600/Donald+Duck+Wallpapers+6.jpg')*/
+}
+
+.aside {
+    order: -1;
 }
 
 .flexContainer {
@@ -108,8 +113,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', end
 
 }
 
-#fulltitle {
-    padding: 0 16em;
+header {
+    height: 25px;
 }
 
 a {
@@ -117,10 +122,32 @@ a {
     color: black;
 }
 
-a:hover {
-    text-shadow: 2px 2px grey;
-}
 
 * {
 font-family: helvetica;
+}
+
+.tabrow {
+  text-align: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  line-height: 24px;
+}
+.tabrow li {
+  margin: 0 10px;
+  padding: 0 10px;
+  border: 1px solid #AAA;
+  background: #ECECEC;
+  display: inline-block;
+}
+
+.tabrow li:hover {
+  background: #FFF;
+  color: #000;
+}
+
+.tabrow li {
+border:2px solid blue;
+   overflow:hidden;
 }

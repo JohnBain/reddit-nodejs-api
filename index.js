@@ -48,37 +48,38 @@ function renderLayout(content) {
           <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
           <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
           <script type="text/javascript" src="../js/main.js"></script>
-         
-          </head>
-            <div id="contents"> 
-            <div class="upperDiv">
-            <nav>
-            <ul>
-            <li><a href="/?subreddit=1">/r/AdviceAnimals</a></li>
-            <li><a href="/?subreddit=3">/r/Cats</a></li>
-            <li><a href="/?subreddit=4">/r/Homepage</a></li>
-            <li><a href="/?subreddit=7">/r/Sadfrogs</a></li>
-            <li><a href="/?subreddit=8">/r/Me_IRL</a></li></ul>
-            </nav>
-            <h1><span id="fulltitle"><span id='one'>Fake</span> <span id='two'>Reddit</span> <span id='three'>Homepage</span><span id='check'>✔</span><span></h1>
-            </div>
-            <section class="bigContainer">
-            
-            <div class="contentContainer">
-            <ul class="contents-list">
-            
-            ${content} 
-            <div class="sideContainer">
-            <ul>
-            <li><a href="/signup">signup</la</li>
-            <li><a href="/login">login</la</li>
-            <li><a href="/createpost">create a post</la</li>
-            <li><a href="/controlpanel">admin console</la</li>
-            </ul>
-            </div>
-    </div>
-    </section>
-  <footer>created by John Bain</footer> </html>`
+<div>
+<header>
+    <h1>
+    <span id="fulltitle"><span id='one'>Fake</span> <span id='two'>Reddit</span> <span id='three'>Homepage</span><span id='check'>✔</span></span>
+    </h1>
+</header>         
+<div>
+<nav>
+    <ul>
+        <li><a href="/?subreddit=1">/r/AdviceAnimals</a></li>
+        <li><a href="/?subreddit=3">/r/Cats</a></li>
+        <li><a href="/?subreddit=4">/r/Homepage</a></li>
+        <li><a href="/?subreddit=7">/r/Sadfrogs</a></li>
+        <li><a href="/?subreddit=8">/r/Me_IRL</a></li>
+    </ul>
+</nav>
+<main>
+  ${content}
+</main>
+</div>
+<div class="aside">
+  <aside class="sideContainer">
+    <ul>
+      <li><a href="/signup">signup</a></li>
+      <li><a href="/login">login</a></li>
+      <li><a href="/createpost">create a post</a></li>
+      <li><a href="/controlpanel">admin console</a></li>
+    </ul>
+</aside> 
+</div>
+</div>
+          </html>`
 }
 
 
@@ -93,8 +94,8 @@ app.get('/', function(req, res) {
     var finalstring = `
     <h3>Welcome to /r/${result[0].subreddit}</h3>
     You are logged in as ${req.loggedInUser.username}<br>
-    <a href="/?sort=hot">hot</a> <a href="/?sort=top">top</a> <a href="/?sort=new">new</a>
-    <a href="/?sort=controversial">controversial</a>`
+    <ul class="tabrow"><li><a href="/?sort=hot">hot</a></li> <li><a href="/?sort=top">top</a></li> <li><a href="/?sort=new">new</a></li>
+    <li><a href="/?sort=controversial">controversial</a></li></ul>`
 
     result.forEach(function(post) { ///REUSEABLE CONTENT
 
@@ -127,7 +128,7 @@ app.get('/', function(req, res) {
     `
     })
 
-    finalstring += `</ul> </li> </ul> </div>
+    finalstring += `</ul> </li> </ul> </div> 
     `
 
     res.send(renderLayout(finalstring))
@@ -249,7 +250,7 @@ app.get('/getTitle', function(req, res) {
           var title = $('title').text()
           console.log($('title').text())
            console.log("We have reached the thing")
-                res.send(title); //change
+                res.send(title); 
         }
         
     });

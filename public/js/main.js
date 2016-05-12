@@ -4,6 +4,7 @@ $(document).ready(function() {
     $( "#two" ).slideUp( 300 ).delay( 800 ).fadeIn( 400 );
     $( "#three" ).slideUp( 300 ).delay( 800 ).fadeIn( 400 );
     $('#check').hide().delay(1500).fadeIn(1000);
+    
 
     $('.vote').submit(function(event) {
         event.preventDefault();
