@@ -145,7 +145,7 @@ app.post('/vote', function(req, res) {
     if (err){console.log("There was an error", err)}
     else{
     console.log(post[0].score, 'here is res score score soaosdasdasd')
-    res.send({score: post[0].score})
+    res.send({score: post[0].score})  //It doesn't like receiving integers as input, so send an object.
     }
   })
 });
@@ -216,6 +216,7 @@ app.get('/createpost', function(request, response) {
   if (!request.loggedInUser) {
     response.status(401).send('You must be logged in to create content!');
   }
+  console.log(request.query)
   response.send(createPost(request.loggedInUser.username, request.query.subreddit)) //broken
 })
 
