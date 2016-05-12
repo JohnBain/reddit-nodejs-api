@@ -141,7 +141,6 @@ var getAllPosts = function(callback) {
 }
 
 var createPost = function(post, callback) {
-  console.log(post, "HERE IS POST")
   conn.query(
     'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, post.selftext, null],
     function(err, result) {
@@ -284,31 +283,40 @@ var getUserFromSession = function(sessionToken, callback) {
 }
 
 var votePost = function(vote, postId, userId, callback) {
-  conn.query('INSERT INTO votes SET vote = ?, postId = ?, userId = ? ON DUPLICATE KEY UPDATE vote=?', [vote, postId, userId, vote], function(err, result) {
-    if (err) {
-      callback(err);
-    }
-    else {
-      callback(null, result);
-    }
-  })
-
-}
-
-var seePostScore = function(postId, callback) {
-  console.log("seePostScore gets this postId:", postId);
-  conn.query(`select sum(vote) AS score from votes 
+    conn.query('INSERT INTO votes SET vote = ?, postId = ?, userId = ? ON DUPLICATE KEY UPDATE vote=?', [vote, postId, userId, vote], function(err, result) {
+          if (err) {
+            callback(err);
+            console.log("There was an error in the function")
+          }
+          else {
+            conn.query(`select sum(vote) AS score from votes 
   LEFT JOIN posts ON posts.id=votes.postId WHERE postId=?`, [postId], function(err, result) {
-    if (err) {
-      callback(err)
-    }
-    else {
-      console.log(result, "Here is result")
-      callback(result)
-    }
-  })
+              if (err) {
+                callback(err)
+              }
+              else {
+                callback(null, result)
+              }
+            })
+
+          }
+    })
 }
 
-module.exports = {
-  getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost, votePost, seePostScore
-};
+          var seePostScore = function(postId, callback) {
+            console.log("seePostScore gets this postId:", postId);
+            conn.query(`select sum(vote) AS score from votes 
+  LEFT JOIN posts ON posts.id=votes.postId WHERE postId=?`, [postId], function(err, result) {
+              if (err) {
+                callback(err)
+              }
+              else {
+                console.log(result, "Here is result")
+                callback(result)
+              }
+            })
+          }
+
+          module.exports = {
+            getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost, votePost
+          };

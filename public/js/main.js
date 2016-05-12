@@ -8,8 +8,12 @@ $(document).ready(function() {
         var item = {vote: this.vote.value,
          postId: this.postId.value,
         }
-        console.log(item)
-        $(this).append(this.vote.value)        //use nth-child and parseInt to solve this, tomorrow!
+        $.post('/vote', item, function(res)
+        {
+            console.log(res.score, 'here is res')   //It has to receive an object! You were sending an integer before.
+            $('#' + item.postId).text(res.score)
+        });
+        
         
        
     })

@@ -117,7 +117,7 @@ app.get('/', function(req, res) {
       
   <div id="post">
       <h2 class='${post.title}'>
-        <p><span class="score">${post.score}</span> <a href='${post.url}'/>${post.title}</a>
+        <p><span id="${post.id}">${post.score}</span> <a href='${post.url}'/>${post.title}</a>
       </h2>
       <p>Created by ${post.user} at ${post.createdAt}</p>
     </div>
@@ -141,13 +141,16 @@ app.get('/', function(req, res) {
 });
 
 app.post('/vote', function(req, res) {
-  redditAPI.votePost(req.body.vote, req.body.postId, req.loggedInUser.id, function(post) {
-    res.redirect(`/vote?vote=${req.body.vote}`)
+  redditAPI.votePost(req.body.vote, req.body.postId, req.loggedInUser.id, function(err, post) {
+    if (err){console.log("There was an error", err)}
+    else{
+    console.log(post[0].score, 'here is res score score soaosdasdasd')
+    res.send({score: post[0].score})
+    }
   })
 });
 
 app.get('/vote', function(req, res) {
-console.log(req.query.vote)
 })
 
 
@@ -223,7 +226,6 @@ app.post('/createpost', function(request, response) {
       response.status(401).send('You must be logged in to create content!');
     }
     else {
-      console.log(request.body);
       // here we have a logged in user, let's create the post with the user!
       redditAPI.createPost({
         userId: request.loggedInUser.id,
