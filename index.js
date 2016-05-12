@@ -54,13 +54,13 @@ function renderLayout(content) {
             <div class="upperDiv">
             <nav>
             <ul>
-            <li>/r/AdviceAnimals</li>
+            <li><a href="/?subreddit=1">/r/AdviceAnimals</a></li>
             <li><a href="/?subreddit=3">/r/Cats</a></li>
             <li><a href="/?subreddit=4">/r/Homepage</a></li>
-            <li>/r/Sadfrogs</li>
-            <li>/r/Me_IRL</li></ul>
+            <li><a href="/?subreddit=7">/r/Sadfrogs</a></li>
+            <li><a href="/?subreddit=8">/r/Me_IRL</a></li></ul>
             </nav>
-            <h1>Fake Reddit Homepage</h1>
+            <h1><span id="fulltitle"><span id='one'>Fake</span> <span id='two'>Reddit</span> <span id='three'>Homepage</span><span id='check'>✔</span><span></h1>
             </div>
             <section class="bigContainer">
             
@@ -111,7 +111,7 @@ app.get('/', function(req, res) {
           <input type="hidden" name="postId" value="${post.id}">
           <button type="submit"><img src="../images/cancel.png"></button>
           </form>
-          <form class="vote" action="/vote" method="post">
+          <form class="vote"  action="/vote" method="post">
            <input type="hidden" name="vote" value="-1">
           <input type="hidden" name="postId" value="${post.id}">
            <button type="submit"><img class = "downarrow" src="../images/downarrow.png"></button>
@@ -235,10 +235,9 @@ app.post('/createpost', function(request, response) {
     }
   })
   //  'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, post.selftext, null],
+
 app.get('/getTitle', function(req, res) {
-  console.log(req.query)
     var url = req.query.url;
-    console.log(url)
     
     request(url, function(err, response) {
         if (err) {
