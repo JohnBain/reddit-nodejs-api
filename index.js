@@ -80,8 +80,11 @@ function renderLayout(content) {
 
 
 app.get('/', function(req, res) {
-  
-  var options = {subreddit:req.query.subreddit, sort:req.query.sort};
+
+  var options = {
+    subreddit: req.query.subreddit,
+    sort: req.query.sort
+  };
 
   redditAPI.getHomepage(options, function(result) { //This is where we pass the sorting query
     var finalstring = `
@@ -90,7 +93,7 @@ app.get('/', function(req, res) {
     <a href="/?sort=hot">hot</a> <a href="/?sort=top">top</a> <a href="/?sort=new">new</a>
     <a href="/?sort=controversial">controversial</a>`
 
-    result.forEach(function(post) {///REUSEABLE CONTENT
+    result.forEach(function(post) { ///REUSEABLE CONTENT
 
       finalstring += `<li class="content-item">
         <div class="godzilla">
@@ -114,7 +117,7 @@ app.get('/', function(req, res) {
       
   <div id="post">
       <h2 class='${post.title}'>
-        <p>${post.score} <a href='${post.url}'/>${post.title}</a>
+        <p><span class="score">${post.score}</span> <a href='${post.url}'/>${post.title}</a>
       </h2>
       <p>Created by ${post.user} at ${post.createdAt}</p>
     </div>
@@ -131,7 +134,7 @@ app.get('/', function(req, res) {
             </ul>
     </div>
     </section>`
-    
+
     res.send(renderLayout(finalstring))
 
   })
@@ -139,20 +142,12 @@ app.get('/', function(req, res) {
 
 app.post('/vote', function(req, res) {
   redditAPI.votePost(req.body.vote, req.body.postId, req.loggedInUser.id, function(post) {
-    res.redirect(`/vote?postId=${req.body.postId}`)
+    res.redirect(`/vote?vote=${req.body.vote}`)
   })
 });
 
 app.get('/vote', function(req, res) {
-  redditAPI.seePostScore(req.query.postId, function(post) {
-    console.log(post)
-    res.send(post)
-  })
-  
-  //select posts.id, posts.title, sum(vote) from votes LEFT JOIN posts ON posts.id=votes.postId GROUP BY postId;  
-  //This is how you find score
-  
-  //select posts.subredditId, posts.id, posts.title, sum(vote) AS score from votes LEFT JOIN posts ON posts.id=votes.postId WHERE postId=8;
+console.log(req.query.vote)
 })
 
 

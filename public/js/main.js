@@ -9,13 +9,7 @@ $(document).ready(function() {
          postId: this.postId.value,
         }
         console.log(item)
-        $.post('/vote', item, function(){
-            $.get('/vote', function(res){
-                console.log(res, "THIS SHOULD BE THE SHIT")
-            console.log("We're in the get method")
-        })
-        });
-        
+        $(this).append(this.vote.value)        //use nth-child and parseInt to solve this, tomorrow!
         
        
     })
