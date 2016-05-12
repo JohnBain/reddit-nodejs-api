@@ -216,7 +216,6 @@ app.get('/createpost', function(request, response) {
   if (!request.loggedInUser) {
     response.status(401).send('You must be logged in to create content!');
   }
-  console.log(request.query)
   response.send(createPost(request.loggedInUser.username, request.query.subreddit)) //broken
 })
 
@@ -227,6 +226,7 @@ app.post('/createpost', function(request, response) {
       response.status(401).send('You must be logged in to create content!');
     }
     else {
+      console.log(request.body) // working
       // here we have a logged in user, let's create the post with the user!
       redditAPI.createPost({
         userId: request.loggedInUser.id,

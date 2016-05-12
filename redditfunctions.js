@@ -85,10 +85,12 @@ var getHomepage = function(options, callback) {
 }
 
 var createPost = function(post, callback) {
+  console.log(post)
   conn.query(
-    'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.selftext, post.subredditId, null],
+    'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, post.selftext,  null],
     function(err, result) {
       if (err) {
+        console.log("We reached an error creating the post", err)
         callback(err);
       }
       else {
@@ -111,62 +113,6 @@ var createPost = function(post, callback) {
     }
   );
 }
-
-
-var getAllPosts = function(callback) {
-  conn.query(`
-        SELECT *, posts.id AS postID, users.username FROM posts JOIN users ON posts.userId = users.id
-        ORDER BY posts.createdAt DESC
-        `,
-    function(err, results) { //We should abstract this all to a function
-      if (err) {
-        callback(err);
-      }
-      else {
-        var x = results.map(function(post) {
-          return {
-            id: post.postID,
-            title: post.title,
-            url: post.url,
-            createdAt: post.createdAt,
-            updatedAt: post.updatedAt,
-            userId: post.userId,
-            user: post.username,
-          };
-        });
-        callback(x);
-      }
-    }
-  )
-}
-
-var createPost = function(post, callback) {
-  conn.query(
-    'INSERT INTO `posts` (`userId`, `title`, `url`, `subredditId`, `selftext`, `createdAt`) VALUES (?, ?, ?, ?, ?, ?)', [post.userId, post.title, post.url, post.subredditId, post.selftext, null],
-    function(err, result) {
-      if (err) {
-        callback(err);
-      }
-      else {
-        /*
-        Post inserted successfully. Let's use the result.insertId to retrieve
-        the post and send it to the caller!
-        */
-        conn.query(
-          'SELECT `id`,`title`,`url`,`userId`, `createdAt`, `subredditId`, `selftext`, `updatedAt` FROM `posts` WHERE `id` = ?', [result.insertId],
-          function(err, result) {
-            if (err) {
-              callback(err);
-            }
-            else {
-              callback(null, result[0]);
-            }
-          }
-        );
-      }
-    }
-  );
-};
 
 var deletePost = function(postname, callback) {
   conn.query(`DELETE FROM posts WHERE title = '${postname}' LIMIT 1`, function(err, result) {
@@ -303,20 +249,7 @@ var votePost = function(vote, postId, userId, callback) {
     })
 }
 
-          var seePostScore = function(postId, callback) {
-            console.log("seePostScore gets this postId:", postId);
-            conn.query(`select sum(vote) AS score from votes 
-  LEFT JOIN posts ON posts.id=votes.postId WHERE postId=?`, [postId], function(err, result) {
-              if (err) {
-                callback(err)
-              }
-              else {
-                console.log(result, "Here is result")
-                callback(result)
-              }
-            })
-          }
 
           module.exports = {
-            getAllPosts, createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost, votePost
+             createPost, getHomepage, createUser, checkLogin, createSession, getUserFromSession, deletePost, votePost
           };
